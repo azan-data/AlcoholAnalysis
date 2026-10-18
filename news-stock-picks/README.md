@@ -8,7 +8,7 @@ On screens 700px wide or narrower it switches to a phone layout: one section at 
 
 ## What's in the snapshot (Oct 18, 2026)
 
-- **Wire:** 23 headlines from Oct 1–18, 2026, from the outlets Perplexity Discover aggregates (CNBC, Yahoo Finance, CNN, Axios, Business Standard and others). Each headline is tagged with the sectors and tickers it moves (−3 to +3), and every one links to its source.
+- **News sentiment:** 42 stories from Oct 1–18, 2026, from the outlets Perplexity Discover aggregates (CNBC, Yahoo Finance, CNN, Reuters and others), with company-specific news for most of the 24 stocks. Claude read each story and tagged the sectors and tickers it helps or hurts (−3 to +3). Each story shows a tone (positive, negative, mixed or neutral), a plain-language market read and what it is good or bad for, and links to its source.
 - **Universe:** 24 large U.S.-listed stocks across energy, defense, semiconductors, big tech, internet, consumer, financials, healthcare, gold and power. Each has its Oct 16 close, 52-week range, latest earnings result and next catalyst, with source links.
 - **Base rates:** midterm-year Q4 seasonality, 52-week-high momentum (George & Hwang 2004), short-term reversal (Jegadeesh 1990) and post-earnings drift (Bernard & Thomas 1989).
 - **Headwinds:** names the news argues against (DAL, CRWV, EIX). These are listed but not scored.
@@ -19,17 +19,19 @@ Five factors, each scored 0–100:
 
 | Factor | How it's computed |
 |---|---|
-| News | Sum of headline tags for the stock (full weight) and its sector (60%), with weight halving every 7 days; `50 + 50·tanh(sum/3)` |
-| Trend | Position of the price in its 52-week range |
-| Discount | Distance below the 52-week high (35% or more = 100); the contrarian counterpart to Trend |
+| News sentiment | Sum of headline tags for the stock (full weight) and its sector (60%), with weight halving every 7 days; `50 + 50·tanh(sum/3)` |
+| Price trend | Position of the price in its 52-week range |
+| Room to rebound | Distance below the 52-week high (35% or more = 100); the contrarian counterpart to Price trend |
 | Earnings | Latest quarter vs. estimates (big beat and raise = 100, miss = 25); blank if not yet reported |
-| Macro fit | Judgment of how the sector fits today's backdrop (oil > $100, 5% 10-year yield, 3.7% CPI, U.S.–Iran conflict, midterms) |
+| Economic backdrop | Judgment of how the sector fits today's backdrop (oil > $100, 5% 10-year yield, 3.7% CPI, U.S.–Iran conflict, midterms) |
 
-`Score = weighted mean of available factors − risk × aversion × 0.3`. Risk comes from volatility estimated from the 52-week range (`σ ≈ ln(high/low)/1.6`), plus 15 points when earnings are due within 10 days. The Conservative, Balanced and Aggressive profiles set the weights, or you can set your own with the sliders.
+`Score = weighted mean of available factors − risk × aversion × 0.3`. Risk comes from volatility estimated from the 52-week range (`σ ≈ ln(high/low)/1.6`), plus 15 points when earnings are due within 10 days. The Conservative, Balanced and Aggressive styles set the weights, or you can set your own with the sliders. Verdicts: Buy ≥ 62, Lean buy ≥ 54, Hold ≥ 45, Avoid below.
+
+Each stock shows its news sentiment as Bearish → Bullish with a count of good and bad stories, up to three plain-language reasons ("Big earnings beat", "Sector headwind", "Earnings Oct 21"), and a one-sentence summary of why it ranks where it does. The full factor table sits under "Show the math".
 
 ## Pulling in Perplexity headlines
 
-perplexity.ai has no public news-feed API, and this build environment's network policy blocked it, so the snapshot uses the original outlets. To use Perplexity Discover directly, copy headlines from perplexity.ai/discover into the **Add headlines from Perplexity** box on the page. Claude tags each one against the same sectors and tickers, and the ranking updates. Pasted headlines are saved in your browser only.
+perplexity.ai has no public news-feed API, and this build environment's network policy blocked it, so the snapshot uses the original outlets. To use Perplexity Discover directly, copy headlines from perplexity.ai/discover into the **Add today's headlines from Perplexity** box on the News tab. Claude tags each one against the same sectors and tickers, and the ranking updates. Pasted headlines are saved in your browser only.
 
 ## Refreshing the snapshot
 

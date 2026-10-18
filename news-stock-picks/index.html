@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-/* Layout: a desk morning note. Market tape on top, the ranked book on the left, the news wire on the right, the method underneath. */
+/* Layout: a desk morning note. Market tape on top, the ranked book on the left, the news wire on the right, the method underneath. Phones get one section per tab. */
 :root {
   --bg: #eef1f4;
   --surface: #ffffff;
@@ -19,6 +19,7 @@
   --pos-soft: #e2ecf8;
   --neg-soft: #f9e6dc;
   --mid: #e3e7eb;
+  --mixed: #8a96a3;
   --up: #177a45;
   --down: #b8332b;
   --good: #177a45;
@@ -37,7 +38,7 @@
   :root:not([data-theme="light"]) {
     --bg: #0e141a; --surface: #151d25; --surface-2: #1a232d; --ink: #e4eaf0; --muted: #96a3b0; --line: #283440;
     --accent: #55b9ba; --accent-soft: #15302f; --pos: #3f8ad9; --neg: #d9662f; --pos-soft: #172a3d; --neg-soft: #35221a;
-    --mid: #2a343e; --up: #4cc489; --down: #f0786c; --good: #4cc489; --good-soft: #14301f; --warn: #e0a84e; --warn-soft: #33281a;
+    --mid: #2a343e; --mixed: #7d8a97; --up: #4cc489; --down: #f0786c; --good: #4cc489; --good-soft: #14301f; --warn: #e0a84e; --warn-soft: #33281a;
     --bad: #f0786c; --bad-soft: #3a1f1c; --hold-soft: #222c36; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .25);
     color-scheme: dark;
   }
@@ -45,7 +46,7 @@
 :root[data-theme="dark"] {
   --bg: #0e141a; --surface: #151d25; --surface-2: #1a232d; --ink: #e4eaf0; --muted: #96a3b0; --line: #283440;
   --accent: #55b9ba; --accent-soft: #15302f; --pos: #3f8ad9; --neg: #d9662f; --pos-soft: #172a3d; --neg-soft: #35221a;
-  --mid: #2a343e; --up: #4cc489; --down: #f0786c; --good: #4cc489; --good-soft: #14301f; --warn: #e0a84e; --warn-soft: #33281a;
+  --mid: #2a343e; --mixed: #7d8a97; --up: #4cc489; --down: #f0786c; --good: #4cc489; --good-soft: #14301f; --warn: #e0a84e; --warn-soft: #33281a;
   --bad: #f0786c; --bad-soft: #3a1f1c; --hold-soft: #222c36; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .25);
   color-scheme: dark;
 }
@@ -68,8 +69,17 @@ p { margin: 0; }
 .mast h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(40px, 6vw, 64px); line-height: .95; letter-spacing: -.005em; text-transform: uppercase; }
 .mast h1 span { color: var(--accent); }
 .mast .dek { max-width: 70ch; color: var(--muted); font-size: 16px; }
-.notice { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 10px; border-radius: 6px; background: var(--warn-soft); color: var(--ink); border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); width: fit-content; max-width: 100%; }
-.notice b { color: var(--warn); }
+.notice { display: inline-flex; align-items: baseline; gap: 8px; font-size: 13px; padding: 6px 10px; border-radius: 6px; background: var(--warn-soft); color: var(--ink); border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); width: fit-content; max-width: 100%; }
+.notice b { color: var(--warn); white-space: nowrap; }
+
+/* How-to */
+.howto { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 20px; align-items: center; box-shadow: var(--shadow); }
+.howto ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px 20px; counter-reset: step; }
+.howto li { counter-increment: step; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; font-size: 14px; align-items: start; }
+.howto li::before { content: counter(step); width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: var(--surface); font: 600 13px/26px var(--font-mono); text-align: center; }
+.howto li b { display: block; color: var(--ink); }
+.howto li span { color: var(--muted); }
+@media (max-width: 700px) { .howto { grid-template-columns: minmax(0, 1fr); } }
 
 /* Tape */
 .tape { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; }
@@ -92,7 +102,7 @@ p { margin: 0; }
 @media (max-width: 1040px) { .main { grid-template-columns: minmax(0, 1fr); } }
 @media (min-width: 1041px) {
   .main > aside { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
-  .wire { max-height: calc(100vh - 150px); overflow-y: auto; overscroll-behavior: contain; }
+  .wire { max-height: calc(100vh - 260px); overflow-y: auto; overscroll-behavior: contain; }
 }
 .sec-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 6px; margin-bottom: 14px; }
 .sec-h h2 { font-family: var(--font-display); font-size: 28px; font-weight: 700; text-transform: uppercase; letter-spacing: .01em; line-height: 1; }
@@ -100,11 +110,19 @@ p { margin: 0; }
 
 /* Controls */
 .controls { display: grid; gap: 10px; margin-bottom: 16px; }
+.ctl-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); width: fit-content; max-width: 100%; }
-.seg button { font: 500 14px var(--font-body); color: var(--ink); background: transparent; border: 0; padding: 8px 14px; cursor: pointer; border-right: 1px solid var(--line); }
+.seg button { font: 500 14px var(--font-body); color: var(--ink); background: transparent; border: 0; padding: 9px 14px; cursor: pointer; border-right: 1px solid var(--line); min-height: 40px; }
 .seg button:last-child { border-right: 0; }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
 .seg button:hover:not([aria-pressed="true"]) { background: var(--surface-2); }
+.profile-desc { font-size: 13.5px; color: var(--muted); }
+.profile-desc b { color: var(--ink); font-weight: 600; }
+.search { flex: 1 1 200px; min-width: 0; max-width: 320px; font: 14px var(--font-body); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; min-height: 40px; }
+.search:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.filters button { font: 500 13px var(--font-body); padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; min-height: 34px; }
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
 details.tune { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
 details.tune summary { cursor: pointer; padding: 9px 14px; font-size: 14px; font-weight: 500; list-style: none; display: flex; justify-content: space-between; gap: 8px; }
 details.tune summary::-webkit-details-marker { display: none; }
@@ -126,81 +144,115 @@ details.tune[open] summary::after { content: "−"; }
 .pick .tkr { font-family: var(--font-display); font-weight: 700; font-size: 34px; line-height: .9; }
 .pick .nm { font-size: 13px; color: var(--muted); }
 .pick .score { font-family: var(--font-mono); font-size: 26px; font-weight: 500; text-align: right; line-height: 1; }
-.pick .score small { display: block; font-size: 11px; color: var(--muted); font-family: var(--font-body); }
+.pick .score small { display: block; font-size: 11px; color: var(--muted); font-family: var(--font-body); margin-top: 3px; }
 .pick p { font-size: 13.5px; }
 .pick .rank { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.pick .line { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
 
-/* Tier pills */
+/* Pills, chips, meters */
 .tier { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; letter-spacing: .02em; }
 .tier::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .tier.buy { background: var(--good-soft); color: var(--good); }
 .tier.acc { background: var(--accent-soft); color: var(--accent); }
 .tier.hold { background: var(--hold-soft); color: var(--muted); }
 .tier.avoid { background: var(--bad-soft); color: var(--bad); }
+.reasons { display: flex; flex-wrap: wrap; gap: 4px; }
+.why-chip { font-size: 11.5px; font-weight: 500; padding: 1px 7px; border-radius: 4px; white-space: nowrap; border: 1px solid transparent; }
+.why-chip.g { background: var(--pos-soft); color: var(--pos); }
+.why-chip.b { background: var(--neg-soft); color: var(--neg); }
+.why-chip.i { background: var(--hold-soft); color: var(--muted); }
+.why-chip.w { background: var(--warn-soft); color: var(--warn); }
+.senti { display: grid; gap: 3px; }
+.senti .lab { font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.senti .lab.pos { color: var(--pos); } .senti .lab.neg { color: var(--neg); } .senti .lab.neu { color: var(--muted); }
+.meter { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; width: 100%; max-width: 110px; }
+.meter i { height: 6px; border-radius: 2px; background: var(--mid); }
+.meter i.on.neg { background: var(--neg); } .meter i.on.pos { background: var(--pos); } .meter i.on.neu { background: var(--mixed); }
+.senti .cnt { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
 
 /* Ranked book */
 .book { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
-.book-head, .row { display: grid; grid-template-columns: 26px minmax(0, 1.25fr) 128px 104px minmax(0, 1.3fr) 58px 18px; grid-template-areas: "rk nm sc fx rg sw ch"; gap: 12px; align-items: center; padding: 10px 14px; }
+.book-head, .row { display: grid; grid-template-columns: 26px minmax(0, 1.6fr) 118px 116px minmax(0, 1fr) 18px; grid-template-areas: "rk nm sc se rg ch" "rk why sc se rg ch"; gap: 4px 14px; align-items: center; padding: 11px 14px; }
+.book-head { grid-template-areas: none; }
+.c-why { grid-area: why; align-self: start; }
 .book-head { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); padding-block: 8px; }
-.book-head > :nth-child(6) { text-align: right; }
 .row { border-bottom: 1px solid var(--line); cursor: pointer; width: 100%; background: transparent; border-left: 0; border-right: 0; border-top: 0; font: inherit; color: inherit; text-align: left; }
 .row:hover { background: var(--surface-2); }
 .row[aria-expanded="true"] { background: var(--surface-2); }
-.c-rk { grid-area: rk; font-family: var(--font-mono); color: var(--muted); font-size: 13px; }
-.c-nm { grid-area: nm; min-width: 0; display: grid; gap: 1px; }
+.c-rk { grid-area: rk; font-family: var(--font-mono); color: var(--muted); font-size: 13px; align-self: start; padding-top: 3px; }
+.c-nm { grid-area: nm; min-width: 0; display: grid; gap: 4px; }
+.c-nm .id { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
 .c-nm .tkr { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-height: 1; }
 .c-nm .nm { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.c-nm .ev { font-size: 11.5px; color: var(--warn); font-weight: 500; }
 .c-sc { grid-area: sc; display: grid; gap: 4px; }
 .c-sc .line { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-.c-sc .v { font-family: var(--font-mono); font-size: 16px; font-weight: 500; }
+.c-sc .v { font-family: var(--font-mono); font-size: 15px; font-weight: 500; }
 .bar { height: 6px; border-radius: 3px; background: var(--mid); overflow: hidden; }
 .bar > i { display: block; height: 100%; background: var(--ink); border-radius: 3px; }
-.c-fx { grid-area: fx; display: flex; gap: 5px; align-items: end; }
-.fx { display: grid; justify-items: center; gap: 2px; }
-.fx .col { width: 12px; height: 30px; background: var(--mid); border-radius: 3px; position: relative; overflow: hidden; }
-.fx .col i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
-.fx .col.na { background: transparent; border: 1px dashed var(--line); }
-.fx b { font-family: var(--font-mono); font-size: 10px; color: var(--muted); font-weight: 400; }
+.c-se { grid-area: se; }
 .c-rg { grid-area: rg; display: grid; gap: 4px; min-width: 0; }
 .c-rg .px { display: flex; justify-content: space-between; gap: 6px; font-family: var(--font-mono); font-size: 13px; }
 .rng { position: relative; height: 6px; border-radius: 3px; background: var(--mid); }
 .rng i { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2.5px solid var(--ink); transform: translate(-50%, -50%); }
 .c-rg .ends { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
-.c-sw { grid-area: sw; text-align: right; font-family: var(--font-mono); font-size: 13px; }
 .c-ch { grid-area: ch; color: var(--muted); font-family: var(--font-mono); transition: transform .15s; }
 .row[aria-expanded="true"] .c-ch { transform: rotate(90deg); }
+.book-empty { padding: 20px 16px; color: var(--muted); font-size: 14px; }
 @media (max-width: 700px) {
   .book-head { display: none; }
-  .row { grid-template-columns: 22px minmax(0, 1fr) 112px; grid-template-areas: "rk nm sc" "rk rg rg" "rk fx sw"; row-gap: 10px; }
+  .row { grid-template-columns: 20px minmax(0, 1fr) 108px; grid-template-areas: "rk nm sc" "rk why why" "rk se rg"; row-gap: 8px; column-gap: 12px; padding-block: 13px; }
   .c-ch { display: none; }
-  .c-sw { align-self: end; }
 }
 
-.detail { border-bottom: 1px solid var(--line); background: var(--surface-2); padding: 4px 14px 18px 52px; display: grid; gap: 14px; }
+.detail { border-bottom: 1px solid var(--line); background: var(--surface-2); padding: 6px 14px 18px 54px; display: grid; gap: 14px; }
 @media (max-width: 700px) { .detail { padding-left: 14px; } }
+.detail .inshort { font-size: 15px; font-weight: 500; }
 .detail .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
 .detail h4 { margin: 0 0 4px; font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .detail p { font-size: 14px; }
-.ftab { width: 100%; border-collapse: collapse; font-size: 13px; }
-.ftab td { padding: 3px 0; border-bottom: 1px dotted var(--line); }
+.ftab { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+.ftab td { padding: 4px 0; border-bottom: 1px dotted var(--line); }
 .ftab td:not(:first-child) { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .ftab tr.tot td { border-bottom: 0; font-weight: 600; padding-top: 6px; }
-.hits { display: grid; gap: 6px; padding: 0; margin: 0; list-style: none; }
-.hits li { font-size: 13px; display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px; }
-.hits .c { font-family: var(--font-mono); text-align: right; }
-.facts { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; }
-.facts span b { font-weight: 500; font-family: var(--font-mono); }
+.ftab .h td { color: var(--muted); font-size: 12px; }
+details.math summary { cursor: pointer; font-size: 13.5px; font-weight: 600; color: var(--accent); }
+.hits { display: grid; gap: 8px; padding: 0; margin: 0; list-style: none; }
+.hits li { font-size: 13.5px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 16px; font-size: 13px; }
+.facts div { display: grid; gap: 1px; }
+.facts span { color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; }
+.facts b { font-weight: 500; font-family: var(--font-mono); }
 .srcs { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; }
 
+/* Tone */
+.tone { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; padding: 1px 7px; border-radius: 4px; white-space: nowrap; }
+.tone.positive { background: var(--pos-soft); color: var(--pos); }
+.tone.negative { background: var(--neg-soft); color: var(--neg); }
+.tone.mixed { background: var(--hold-soft); color: var(--ink); }
+.tone.neutral { background: var(--hold-soft); color: var(--muted); }
+.mood { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 8px; margin-bottom: 12px; }
+.mood .t { font-size: 13.5px; }
+.mood .t b { font-weight: 600; }
+.moodbar { display: flex; gap: 2px; height: 10px; border-radius: 3px; overflow: hidden; }
+.moodbar i { display: block; height: 100%; }
+.moodbar .positive { background: var(--pos); } .moodbar .negative { background: var(--neg); } .moodbar .mixed { background: var(--mixed); } .moodbar .neutral { background: var(--mid); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+
 /* Wire */
+details.addnews { background: var(--surface); border: 1px solid var(--accent); border-radius: 10px; margin-bottom: 12px; }
+details.addnews summary { cursor: pointer; padding: 11px 14px; font-weight: 600; font-size: 14px; color: var(--accent); list-style: none; display: flex; justify-content: space-between; gap: 8px; }
+details.addnews summary::-webkit-details-marker { display: none; }
+details.addnews summary::after { content: "+"; font-family: var(--font-mono); }
+details.addnews[open] summary::after { content: "−"; }
+details.addnews .body { padding: 0 14px 14px; display: grid; gap: 10px; }
 .wire-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.wire-tabs button { font: 500 13px var(--font-body); padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.wire-tabs button { font: 500 13px var(--font-body); padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; min-height: 34px; }
 .wire-tabs button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
 .wire { display: grid; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
 .story { padding: 14px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
 .story:last-child { border-bottom: 0; }
-.story .meta { font-size: 11.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 10px; letter-spacing: .02em; }
+.story .meta { font-size: 11.5px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; letter-spacing: .02em; }
 .story .cat { font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--ink); }
 .story .pasted { color: var(--accent); font-weight: 600; }
 .story h3 { font-size: 15px; font-weight: 600; line-height: 1.35; }
@@ -209,7 +261,9 @@ details.tune[open] summary::after { content: "−"; }
 .story .sum { font-size: 13.5px; }
 .story .why { font-size: 13px; color: var(--muted); }
 .story .why b { color: var(--ink); font-weight: 600; }
-.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.effects { display: grid; gap: 4px; font-size: 12.5px; }
+.effects div { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
+.effects .k { color: var(--muted); min-width: 56px; }
 .chip { font-size: 11.5px; font-weight: 500; padding: 2px 7px; border-radius: 4px; font-family: var(--font-mono); white-space: nowrap; }
 .chip.p { background: var(--pos-soft); color: var(--pos); }
 .chip.n { background: var(--neg-soft); color: var(--neg); }
@@ -221,21 +275,19 @@ details.tune[open] summary::after { content: "−"; }
 .card h3 { font-family: var(--font-display); font-size: 22px; font-weight: 600; text-transform: uppercase; line-height: 1; }
 .card .sub { font-size: 13px; color: var(--muted); }
 .dv { display: grid; gap: 6px; }
-.dv-row { display: grid; grid-template-columns: 132px minmax(0, 1fr) 54px; gap: 10px; align-items: center; font-size: 13px; }
+.dv-row { display: grid; grid-template-columns: 132px minmax(0, 1fr) 54px; gap: 10px; align-items: center; font-size: 13px; border-radius: 4px; }
 .dv-row .lab { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dv-row .val { font-family: var(--font-mono); text-align: right; font-size: 12.5px; }
 .dv-track { position: relative; height: 16px; }
-.dv-track::before { content: ""; position: absolute; top: -3px; bottom: -3px; left: var(--zero, 50%); width: 1px; background: var(--muted); opacity: .6; }
+.dv-track::before { content: ""; position: absolute; top: -3px; bottom: -3px; left: 50%; width: 1px; background: var(--muted); opacity: .6; }
 .dv-track i { position: absolute; top: 2px; height: 12px; background: var(--pos); }
 .dv-track i.neg { background: var(--neg); }
 .dv-track i.pos { border-radius: 0 4px 4px 0; }
 .dv-track i.neg { border-radius: 4px 0 0 4px; }
 .dv-track i.bench { background: var(--muted); opacity: .55; }
 .dv-row.is-bench .lab { font-weight: 600; }
-.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
-.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
-.dv-row[tabindex] { cursor: default; border-radius: 4px; }
 .dv-row:hover { background: var(--surface-2); }
+@media (max-width: 420px) { .dv-row { grid-template-columns: 112px minmax(0, 1fr) 48px; } }
 
 /* History + headwinds */
 .hist { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
@@ -253,15 +305,15 @@ details.tune[open] summary::after { content: "−"; }
 .heads p { font-size: 13.5px; }
 
 /* Ask Claude */
-.ask { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-.ask textarea { width: 100%; min-height: 96px; resize: vertical; font: 14px/1.45 var(--font-body); color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
-.ask textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+.ask { display: grid; gap: 20px; max-width: 860px; }
+textarea { width: 100%; min-height: 96px; resize: vertical; font: 15px/1.45 var(--font-body); color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; }
 .btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.btn { font: 600 14px var(--font-body); padding: 8px 16px; border-radius: 8px; border: 1px solid var(--ink); background: var(--ink); color: var(--surface); cursor: pointer; }
+.btn { font: 600 14px var(--font-body); padding: 9px 16px; min-height: 40px; border-radius: 8px; border: 1px solid var(--ink); background: var(--ink); color: var(--surface); cursor: pointer; }
 .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
 .btn:disabled { opacity: .45; cursor: not-allowed; }
 .sugs { display: flex; flex-wrap: wrap; gap: 6px; }
-.sugs button { font: 13px var(--font-body); padding: 4px 10px; border-radius: 999px; border: 1px dashed var(--line); background: transparent; color: var(--ink); cursor: pointer; text-align: left; }
+.sugs button { font: 13px var(--font-body); padding: 6px 11px; border-radius: 999px; border: 1px dashed var(--line); background: transparent; color: var(--ink); cursor: pointer; text-align: left; }
 .sugs button:hover { border-color: var(--accent); color: var(--accent); }
 .answer { font-size: 14.5px; line-height: 1.55; display: grid; gap: 8px; }
 .answer:empty { display: none; }
@@ -273,68 +325,87 @@ details.tune[open] summary::after { content: "−"; }
 
 /* Method */
 .method { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px 28px; }
-.method dl { margin: 0; display: grid; gap: 10px; }
+.method dl { margin: 0; display: grid; gap: 10px; align-content: start; }
 .method dt { font-weight: 600; font-size: 14px; }
 .method dd { margin: 0; font-size: 13.5px; color: var(--muted); }
 .method code { font-family: var(--font-mono); font-size: 12.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; color: var(--ink); }
 .method p { font-size: 13.5px; color: var(--muted); }
+.method p b { color: var(--ink); }
 details.sources summary { cursor: pointer; font-weight: 500; font-size: 14px; }
 details.sources ol { font-size: 12.5px; color: var(--muted); padding-left: 22px; display: grid; gap: 3px; margin: 10px 0 0; }
 details.sources a { word-break: break-word; }
 footer { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 6px; }
 
+#tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--surface); font-size: 12.5px; line-height: 1.4; padding: 7px 9px; border-radius: 6px; max-width: 260px; box-shadow: var(--shadow); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
 /* Phone: one section at a time, switched from a bottom tab bar */
 .tabbar { display: none; }
 @media (max-width: 700px) {
   body { padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
-  .wrap { padding-block: 18px 28px; gap: 22px; }
+  .wrap { padding-block: 18px 28px; gap: 20px; }
   .mast h1 { font-size: 38px; }
   .mast .dek { display: none; }
+  body:not([data-view="picks"]) .mast .eyebrow { display: none; }
+  body:not([data-view="picks"]) .mast h1 { font-size: 28px; }
+  #read-sec { order: 1; }
   body:not([data-view="picks"]) .mast .notice { display: none; }
-  .tape { display: flex; overflow-x: auto; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
-  .tick { flex: 0 0 138px; scroll-snap-align: start; border-bottom: 0; }
   body[data-view="picks"] [data-views]:not([data-views~="picks"]),
   body[data-view="news"] [data-views]:not([data-views~="news"]),
   body[data-view="markets"] [data-views]:not([data-views~="markets"]),
   body[data-view="ask"] [data-views]:not([data-views~="ask"]) { display: none; }
+  .tape { display: flex; overflow-x: auto; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+  .tick { flex: 0 0 138px; scroll-snap-align: start; border-bottom: 0; }
+  .search { max-width: none; }
   .tabbar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -4px 16px rgba(20, 34, 48, .08); padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
   .tabbar button { display: grid; justify-items: center; gap: 3px; padding: 9px 0 7px; font: 600 11px var(--font-body); letter-spacing: .02em; color: var(--muted); background: none; border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .tabbar button[aria-current="page"] { color: var(--accent); }
   .tabbar svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .tabbar .badge { font-family: var(--font-mono); font-size: 10px; font-weight: 500; }
 }
-
-#tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--surface); font-size: 12.5px; line-height: 1.4; padding: 7px 9px; border-radius: 6px; max-width: 260px; box-shadow: var(--shadow); }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
 <div class="wrap">
   <header class="mast" data-views="picks news markets ask">
     <div class="eyebrow"><span>Morning note · Sun Oct 18, 2026</span><span>News through Oct 18 · Prices at Fri Oct 16 close</span></div>
     <h1>Headlines <span>to</span> Holdings</h1>
-    <p class="dek">Which U.S. stocks this week's top world, business and tech headlines favor, scored against each stock's 52-week price history, its latest earnings and long-run market base rates. Re-weight the model, read the headlines behind each score, or ask Claude about the picks.</p>
-    <p class="notice"><b>Research, not advice.</b> Scores rank ideas from public reporting. Check live prices and your own situation before you trade.</p>
+    <p class="dek">Which U.S. stocks this week's top world, business and tech news favors. Every story is read for sentiment, and each stock's score combines that with its price history, latest earnings and long-run market patterns.</p>
+    <p class="notice"><b>Research, not advice.</b> <span>Scores rank ideas from public reporting. Check live prices and your own situation before you trade.</span></p>
+    <p class="notice" id="stale" hidden></p>
   </header>
+
+  <section class="howto" id="howto" data-views="picks" aria-label="How to use this page" hidden>
+    <ol>
+      <li><span><b>Pick your style</b> Conservative, Balanced or Aggressive changes what the ranking rewards.</span></li>
+      <li><span><b>Tap any stock</b> to see, in plain words, why it ranks there and which headlines moved it.</span></li>
+      <li><span><b>Add news or ask</b> Paste new Perplexity headlines under News, or ask Claude about the picks under Ask.</span></li>
+    </ol>
+    <button type="button" class="btn ghost" id="howto-x">Got it</button>
+  </section>
 
   <section class="tape" id="tape" aria-label="Market snapshot" data-views="picks"></section>
 
-  <section aria-labelledby="read-h" data-views="news">
+  <section aria-labelledby="read-h" data-views="news" id="read-sec">
     <div class="sec-h"><h2 id="read-h">The read</h2><span class="aside">What the week's news says about where money is moving</span></div>
     <div class="read">
-      <article><h3>Oil shock favors producers and defense</h3><p>Brent touched $110 as Iran escalated attacks in the Strait of Hormuz. Energy leads the S&amp;P 500 this year at about +51%, and defense primes jumped about 4% on Oct 16.</p></article>
-      <article><h3>AI hardware is on sale, for a reason</h3><p>Chip stocks fell eight straight days, the longest run since 2008, on Chinese memory competition and worries about AI debt. TSMC's record quarter says demand is still there.</p></article>
+      <article><h3>Oil shock favors producers and defense</h3><p>Brent touched $110 as Iran escalated attacks in the Strait of Hormuz. Energy leads the S&amp;P 500 this year at about +51%, and RTX landed two big missile contracts.</p></article>
+      <article><h3>AI hardware is on sale, for a reason</h3><p>Chip stocks fell eight straight days, the longest run since 2008, on Chinese memory competition, AI debt and stalled data centers. TSMC's record quarter says demand is still there.</p></article>
       <article><h3>Rates are the brake</h3><p>The 10-year yield sits near 5.1%, September CPI ran 3.7% and Fed minutes point to another hike. That weighs on long-duration tech, power producers and indebted borrowers.</p></article>
-      <article><h3>Earnings beats are getting paid</h3><p>Goldman and UnitedHealth beat estimates by wide margins, and money rotated into healthcare. Netflix, Tesla and Meta report next week.</p></article>
+      <article><h3>Earnings beats are getting paid</h3><p>Goldman and UnitedHealth beat estimates by wide margins, and money rotated into healthcare. Netflix, RTX, Tesla and Meta report next week.</p></article>
     </div>
   </section>
 
   <div class="main">
     <section aria-labelledby="book-h" data-views="picks">
-      <div class="sec-h"><h2 id="book-h">Ranked picks</h2><span class="aside" id="book-aside">24 U.S. stocks · higher score = stronger case today</span></div>
+      <div class="sec-h"><h2 id="book-h">Ranked picks</h2><span class="aside" id="book-aside"></span></div>
       <div class="controls">
-        <div class="seg" role="group" aria-label="Investor profile" id="profiles"></div>
+        <div class="seg" role="group" aria-label="Investing style" id="profiles"></div>
+        <p class="profile-desc" id="profile-desc"></p>
+        <div class="ctl-row">
+          <input type="search" class="search" id="search" aria-label="Find a stock or sector" placeholder="Find a stock or sector" autocomplete="off">
+          <div class="filters" id="filters" role="group" aria-label="Filter by verdict"></div>
+        </div>
         <details class="tune" id="tune">
-          <summary>Adjust model weights</summary>
+          <summary>Fine-tune the formula</summary>
           <div class="sliders" id="sliders"></div>
         </details>
       </div>
@@ -343,19 +414,31 @@ footer { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--lin
     </section>
 
     <aside aria-labelledby="wire-h" data-views="news">
-      <div class="sec-h"><h2 id="wire-h">The wire</h2><span class="aside" id="wire-count"></span></div>
+      <div class="sec-h"><h2 id="wire-h">News sentiment</h2><span class="aside" id="wire-count"></span></div>
+      <div class="mood" id="mood"></div>
+      <details class="addnews" id="addnews">
+        <summary>Add today's headlines from Perplexity</summary>
+        <div class="body">
+          <p class="muted" style="font-size:13.5px">Open <a href="https://www.perplexity.ai/discover" target="_blank" rel="noopener">perplexity.ai/discover</a>, copy the headlines you care about and paste them here, one per line. Claude reads each one for sentiment, tags the stocks and sectors it helps or hurts, and the ranking updates.</p>
+          <p class="off" id="paste-off" hidden></p>
+          <label for="paste" class="muted" style="font-size:13px">Headlines, one per line (up to 25)</label>
+          <textarea id="paste" placeholder="Fed's Waller says another hike is likely in December&#10;Exxon to raise buyback after record output&#10;Nvidia wins new sovereign AI order"></textarea>
+          <div class="btns"><button class="btn" id="score-btn" disabled>Read sentiment and add</button><button class="btn ghost" id="clear-btn" hidden>Remove pasted headlines</button></div>
+          <span class="status" id="score-status" role="status"></span>
+        </div>
+      </details>
       <div class="wire-tabs" id="wire-tabs" role="group" aria-label="Filter headlines"></div>
       <div class="wire" id="wire"></div>
     </aside>
   </div>
 
   <section aria-labelledby="sig-h" data-views="markets">
-    <div class="sec-h"><h2 id="sig-h">Sector signal</h2><span class="aside">News pressure today next to how sectors have actually performed in 2026</span></div>
+    <div class="sec-h"><h2 id="sig-h">Sector signal</h2><span class="aside">News sentiment today next to how sectors have actually performed in 2026</span></div>
     <div class="charts">
       <div class="card">
-        <h3>News pressure by sector</h3>
-        <p class="sub">Average news score of each sector's stocks, centered on neutral (0). Recent headlines count more.</p>
-        <div class="legend"><span style="--c: var(--pos)">Headlines favor</span><span style="--c: var(--neg)">Headlines weigh on</span></div>
+        <h3>News sentiment by sector</h3>
+        <p class="sub">Average news-sentiment score of each sector's stocks, centered on neutral (0). Recent stories count more.</p>
+        <div class="legend"><span style="--c: var(--pos)">News is positive</span><span style="--c: var(--neg)">News is negative</span></div>
         <div class="dv" id="chart-news"></div>
       </div>
       <div class="card">
@@ -368,7 +451,7 @@ footer { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--lin
   </section>
 
   <section aria-labelledby="hist-h" data-views="markets">
-    <div class="sec-h"><h2 id="hist-h">What history says</h2><span class="aside">Base rates behind the model's factors</span></div>
+    <div class="sec-h"><h2 id="hist-h">What history says</h2><span class="aside">Long-run patterns behind the score</span></div>
     <div class="hist" id="hist"></div>
   </section>
 
@@ -378,51 +461,44 @@ footer { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--lin
   </section>
 
   <section aria-labelledby="ask-h" data-views="ask">
-    <div class="sec-h"><h2 id="ask-h">Ask Claude</h2><span class="aside">Uses your Claude account; each question asks for your OK first</span></div>
-    <p class="off" id="ask-off" hidden>Asking Claude works when this page is open on claude.ai. Everything else on the page works without it.</p>
+    <div class="sec-h"><h2 id="ask-h">Ask Claude</h2><span class="aside">Uses your Claude account; the first question asks for your OK</span></div>
     <div class="ask">
+      <p class="off" id="ask-off" hidden></p>
       <div class="card">
         <h3>Question the picks</h3>
-        <p class="sub">Claude sees the current ranking under your weights, the headlines and the base rates on this page.</p>
+        <p class="sub">Claude sees the current ranking under your style, every headline and its sentiment, and the patterns on this page. Tap a suggestion or write your own.</p>
         <div class="sugs" id="sugs"></div>
         <label for="q" class="sub">Your question</label>
         <textarea id="q" placeholder="e.g. Build a $10,000 balanced portfolio from the top picks and explain the sizing."></textarea>
-        <div class="btns"><button class="btn" id="ask-btn" disabled>Ask Claude</button><button class="btn ghost" id="stop-btn" hidden>Stop</button><span class="status" id="ask-status"></span></div>
+        <div class="btns"><button class="btn" id="ask-btn" disabled>Ask Claude</button><button class="btn ghost" id="stop-btn" hidden>Stop</button><span class="status" id="ask-status" role="status"></span></div>
         <div class="answer" id="answer" aria-live="polite"></div>
-      </div>
-      <div class="card">
-        <h3>Add headlines from Perplexity</h3>
-        <p class="sub">Open <a href="https://www.perplexity.ai/discover" target="_blank" rel="noopener">perplexity.ai/discover</a>, copy the Top, Finance or Tech headlines you care about, and paste them here, one per line. Claude tags each with the sectors and stocks it moves, and the ranking updates.</p>
-        <label for="paste" class="sub">Headlines, one per line (up to 25)</label>
-        <textarea id="paste" placeholder="Fed's Waller says another hike is likely in December&#10;Exxon to raise buyback after record output&#10;Nvidia wins new sovereign AI order"></textarea>
-        <div class="btns"><button class="btn" id="score-btn" disabled>Score and add</button><button class="btn ghost" id="clear-btn" hidden>Remove pasted headlines</button><span class="status" id="score-status"></span></div>
       </div>
     </div>
   </section>
 
   <section aria-labelledby="method-h" data-views="ask">
-    <div class="sec-h"><h2 id="method-h">How the score works</h2><span class="aside">Every input is shown in each stock's detail row</span></div>
+    <div class="sec-h"><h2 id="method-h">How the score works</h2><span class="aside">Every input is shown under "Show the math" for each stock</span></div>
     <div class="method">
       <dl>
-        <dt>News (0–100)</dt>
-        <dd>Each headline is tagged with the sectors and stocks it moves, from −3 to +3. A tag on the stock counts in full, a tag on its sector counts 60%. Each headline's weight halves every 7 days. The sum <code>s</code> becomes <code>50 + 50·tanh(s/3)</code>.</dd>
-        <dt>Trend (0–100)</dt>
+        <dt>News sentiment</dt>
+        <dd>Claude reads each story and tags which sectors and stocks it helps or hurts, from −3 to +3. The reasoning appears as the "Market read" on every story, so you can check it. A tag on the stock itself counts in full, a tag on its sector counts 60%, and a story's weight halves every 7 days. The total <code>s</code> becomes a 0–100 score, <code>50 + 50·tanh(s/3)</code>, shown as Bearish to Bullish.</dd>
+        <dt>Price trend</dt>
         <dd>Where the price sits in its 52-week range: 0 at the low, 100 at the high. Stocks near their 52-week highs have tended to keep outperforming (George &amp; Hwang, 2004).</dd>
-        <dt>Discount (0–100)</dt>
-        <dd>How far the price is below its 52-week high, with 35% or more scoring 100. This is the contrarian side, the opposite bet to Trend: recent losers tend to bounce in the short run (Jegadeesh, 1990). Profiles decide how much each style counts.</dd>
+        <dt>Room to rebound</dt>
+        <dd>How far the price is below its 52-week high, with 35% or more scoring 100. This is the bargain-hunting bet, the opposite of Price trend: recent losers tend to bounce in the short run (Jegadeesh, 1990). Your style decides how much each counts.</dd>
       </dl>
       <dl>
-        <dt>Earnings (0–100, when reported)</dt>
-        <dd>The latest quarter against analyst estimates: a big beat with raised guidance scores 100, a miss 25. Stocks that beat tend to keep drifting up for weeks (Bernard &amp; Thomas, 1989). Left blank for companies that haven't reported Q3 yet.</dd>
-        <dt>Macro fit (0–100)</dt>
-        <dd>A judgment call by Claude on how the sector fits today's backdrop: oil above $100, a 5% 10-year yield, 3.7% inflation, an active U.S.–Iran conflict and midterms on Nov 3. The reasoning appears in each stock's detail row.</dd>
-        <dt>Risk penalty</dt>
-        <dd>Volatility is estimated from the 52-week range, <code>σ ≈ ln(high/low) ÷ 1.6</code> per year, and an earnings report within 10 days adds 15 points. The penalty is <code>risk × aversion × 0.3</code>.</dd>
+        <dt>Earnings</dt>
+        <dd>The latest quarter against analyst estimates: a big beat with raised guidance scores 100, a miss scores 25. Stocks that beat tend to keep drifting up for weeks (Bernard &amp; Thomas, 1989). Left out for companies that haven't reported yet.</dd>
+        <dt>Economic backdrop</dt>
+        <dd>Claude's judgment of how each sector fits today's conditions: oil above $100, a 5% 10-year yield, 3.7% inflation, an active U.S.–Iran conflict and midterms on Nov 3. The reasoning is shown for each stock.</dd>
+        <dt>Risk</dt>
+        <dd>Volatility estimated from the 52-week range, <code>σ ≈ ln(high/low) ÷ 1.6</code> per year, plus 15 points when earnings are due within 10 days. The penalty is <code>risk × risk aversion × 0.3</code>.</dd>
       </dl>
       <div style="display:grid; gap:12px; align-content:start">
-        <p><b style="color:var(--ink)">Score</b> = weighted average of the available factors − risk penalty. Missing factors drop out and the remaining weights are rescaled. Buy ≥ <span id="t-buy"></span>, Accumulate ≥ <span id="t-acc"></span>, Hold ≥ <span id="t-hold"></span>, Avoid below.</p>
-        <p><b style="color:var(--ink)">Typical 3-month move</b> is one standard deviation, <code>σ ÷ 2</code>, estimated from the 52-week range. About two times in three, a stock has moved less than this over three months.</p>
-        <p><b style="color:var(--ink)">Where the data came from.</b> Headlines come from the outlets Perplexity Discover draws on (CNBC, Yahoo Finance, CNN, Axios and others), collected Oct 18, 2026. Prices, ranges and earnings come from public quote pages and earnings coverage. A few figures come from one source only and are marked in their detail rows.</p>
+        <p><b>Score</b> = weighted average of the available factors − risk penalty. Missing factors drop out and the other weights are rescaled. Buy ≥ <span id="t-buy"></span>, Lean buy ≥ <span id="t-acc"></span>, Hold ≥ <span id="t-hold"></span>, Avoid below.</p>
+        <p><b>Typical 3-month swing</b> is one standard deviation, <code>σ ÷ 2</code>. About two times in three, a stock has moved less than this over three months.</p>
+        <p><b>Where the news came from.</b> <span id="src-note"></span> Prices, ranges and earnings come from public quote pages and earnings coverage. A few figures come from one source only and are marked on that stock.</p>
         <details class="sources"><summary>All sources (<span id="src-count"></span>)</summary><ol id="src-list"></ol></details>
       </div>
     </div>
@@ -456,23 +532,23 @@ const SECTORS = {
   Financials: { label: "Financials", fit: 55, why: "Trading and IPO activity are booming, but loan-loss provisions are rising and the sector is flat for the year." },
   BigTech: { label: "Big Tech", fit: 50, why: "Cash-rich and not reliant on debt, but a 5% 10-year yield pressures long-duration valuations and AI spending is under scrutiny." },
   Internet: { label: "Internet & media", fit: 45, why: "Communication services is down about 6% this year, and investors want proof that AI capex is paying off." },
-  Semis: { label: "Semiconductors", fit: 40, why: "AI demand is intact, but an 8-day rout, Chinese memory competition, customers designing their own chips and AI-debt stress all weigh on the group." },
-  Power: { label: "Power producers", fit: 40, why: "The data-center demand story is intact, but 5% yields hurt capital-heavy utilities (down about 2% this year) and Texas power prices are low." },
+  Semis: { label: "Semiconductors", fit: 40, why: "AI demand is intact, but an 8-day rout, Chinese memory competition, customers designing their own chips, stalled data centers and AI-debt stress all weigh on the group." },
+  Power: { label: "Power producers", fit: 40, why: "The data-center demand story is intact, but 5% yields hurt capital-heavy utilities (down about 2% this year), many data-center projects are stalling and Texas power prices are low." },
   Consumer: { label: "Consumer discretionary", fit: 30, why: "The weakest S&P sector this year. Fuel costs, 3.7% inflation and 29,000 new jobs in September squeeze shoppers." },
 };
 
 const PROFILES = {
-  conservative: { label: "Conservative", w: { news: 25, trend: 30, discount: 5, earnings: 15, macro: 25 }, aversion: 80 },
-  balanced: { label: "Balanced", w: { news: 30, trend: 20, discount: 15, earnings: 15, macro: 20 }, aversion: 40 },
-  aggressive: { label: "Aggressive", w: { news: 30, trend: 10, discount: 35, earnings: 10, macro: 15 }, aversion: 0 },
+  conservative: { label: "Conservative", desc: "Favors stocks that are already rising with good news behind them, and marks down big price swings.", w: { news: 25, trend: 30, discount: 5, earnings: 15, macro: 25 }, aversion: 80 },
+  balanced: { label: "Balanced", desc: "Weighs news sentiment most, then price trend and the economic backdrop, with a moderate penalty for risk.", w: { news: 30, trend: 20, discount: 15, earnings: 15, macro: 20 }, aversion: 40 },
+  aggressive: { label: "Aggressive", desc: "Hunts for beaten-down stocks with good news that could rebound, and ignores volatility.", w: { news: 30, trend: 10, discount: 35, earnings: 10, macro: 15 }, aversion: 0 },
 };
 
 const FACTORS = [
-  { k: "news", label: "News", short: "N", hint: "Headline sentiment" },
-  { k: "trend", label: "Trend", short: "T", hint: "Position in 52-week range" },
-  { k: "discount", label: "Discount", short: "D", hint: "Distance below 52-week high" },
-  { k: "earnings", label: "Earnings", short: "E", hint: "Latest quarter vs. estimates" },
-  { k: "macro", label: "Macro fit", short: "M", hint: "Sector fit with today's backdrop" },
+  { k: "news", label: "News sentiment", hint: "How positive this week's stories are" },
+  { k: "trend", label: "Price trend", hint: "Where the price sits in its 52-week range" },
+  { k: "discount", label: "Room to rebound", hint: "How far below its 52-week high" },
+  { k: "earnings", label: "Earnings", hint: "Latest quarter vs. estimates" },
+  { k: "macro", label: "Economic backdrop", hint: "How the sector fits today's conditions" },
 ];
 
 const clamp = (x, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, x));
@@ -523,13 +599,13 @@ function scoreStock(f, weights, aversion) {
   }
   const base = den ? num / den : 50;
   const penalty = f.risk * (aversion / 100) * 0.3;
-  for (const p of parts) p.contrib = p.v * p.w / den;
+  for (const p of parts) { p.contrib = p.v * p.w / den; p.lift = (p.v - 50) * p.w / den; }
   return { base, penalty, score: base - penalty, parts };
 }
 
 function tierOf(score) {
   if (score >= TIERS.buy) return { k: "buy", label: "Buy" };
-  if (score >= TIERS.acc) return { k: "acc", label: "Accumulate" };
+  if (score >= TIERS.acc) return { k: "acc", label: "Lean buy" };
   if (score >= TIERS.hold) return { k: "hold", label: "Hold" };
   return { k: "avoid", label: "Avoid" };
 }
@@ -540,6 +616,56 @@ function rankAll(stocks, headlines, weights, aversion) {
     const r = scoreStock(f, weights, aversion);
     return { s, f, ...r, tier: tierOf(r.score) };
   }).sort((a, b) => b.score - a.score);
+}
+
+/* Sentiment in words */
+function toneOf(h) {
+  const p = h.impacts.some(i => i.d > 0), n = h.impacts.some(i => i.d < 0);
+  return p && n ? "mixed" : p ? "positive" : n ? "negative" : "neutral";
+}
+function sentimentOf(newsScore) {
+  if (newsScore >= 68) return { label: "Bullish", step: 4, cls: "pos" };
+  if (newsScore >= 56) return { label: "Leaning bullish", step: 3, cls: "pos" };
+  if (newsScore > 44) return { label: "Neutral", step: 2, cls: "neu" };
+  if (newsScore > 32) return { label: "Leaning bearish", step: 1, cls: "neg" };
+  return { label: "Bearish", step: 0, cls: "neg" };
+}
+
+/* Plain-language reasons: [{text, kind}] with kind g (good), b (bad), w (watch), i (info) */
+function reasonsFor(r) {
+  const f = r.f, s = r.s, out = [];
+  if (f.news >= 68) out.push({ text: "Strong positive news", kind: "g" });
+  else if (f.news >= 56) out.push({ text: "Positive news", kind: "g" });
+  else if (f.news <= 32) out.push({ text: "Heavy negative news", kind: "b" });
+  else if (f.news <= 44) out.push({ text: "Negative news", kind: "b" });
+  else out.push({ text: "Neutral news", kind: "i" });
+  if (f.earnings != null) out.push(f.earnings >= 90 ? { text: "Big earnings beat", kind: "g" } : f.earnings >= 70 ? { text: "Beat estimates", kind: "g" } : { text: "Missed estimates", kind: "b" });
+  if (f.macro >= 75) out.push({ text: "Sector tailwind", kind: "g" });
+  else if (f.macro <= 35) out.push({ text: "Sector headwind", kind: "b" });
+  if (f.trend >= 90) out.push({ text: "Near 52-week high", kind: "g" });
+  else if (f.offHigh >= 0.25) out.push({ text: `${Math.round(f.offHigh * 100)}% below its high`, kind: "i" });
+  if (f.eventSoon) out.push({ text: `Earnings ${s.next.label.replace(/^Earnings /, "")}`, kind: "w" });
+  if (f.sigma >= 0.6) out.push({ text: "Very volatile", kind: "w" });
+  return out;
+}
+
+const LIFT_WORDS = {
+  news: ["upbeat news coverage", "negative news coverage"],
+  trend: ["a strong price trend", "a weak price trend"],
+  discount: ["room to rebound from its high", "little discount from its high"],
+  earnings: ["a strong earnings report", "a weak earnings report"],
+  macro: ["a supportive economic backdrop", "a tough backdrop for its sector"],
+};
+function inShort(r, rank) {
+  const ups = r.parts.filter(p => p.lift > 1.5).sort((a, b) => b.lift - a.lift).slice(0, 2).map(p => LIFT_WORDS[p.k][0]);
+  const downs = r.parts.filter(p => p.lift < -1.5).sort((a, b) => a.lift - b.lift).map(p => ({ w: LIFT_WORDS[p.k][1], v: -p.lift }));
+  if (r.penalty > 3) downs.push({ w: r.f.eventSoon ? "an earnings report coming up" : "its price swings", v: r.penalty });
+  downs.sort((a, b) => b.v - a.v);
+  const join = a => a.length === 2 ? `${a[0]} and ${a[1]}` : a[0];
+  let txt = `${r.s.t} ranks #${rank} (${r.tier.label})`;
+  txt += ups.length ? ` thanks to ${join(ups)}` : " with no standout strengths";
+  txt += downs.length ? `, held back by ${join(downs.slice(0, 2).map(d => d.w))}.` : ".";
+  return txt;
 }
 /*MODEL-END*/
 
@@ -663,13 +789,85 @@ const HEADLINES = [
     summary: "Steady government contracts and cash flow keep funding dividend increases at the big defense contractors.",
     read: "Defense demand runs on multi-year budgets, so it doesn't depend on one headline.",
     impacts: [{ t: "Defense", d: 1 }] },
+  { id: "nvda-huang", cat: "Tech", outlet: "24/7 Wall St.", date: "2026-10-17", title: "Nvidia's CEO Says \"All of This Is Going to Pass\" After Tech Lost $1 Trillion in a Day", url: "https://247wallst.com/investing/2026/10/17/nvidias-ceo-says-all-of-this-is-going-to-pass-after-tech-lost-1-trillion-in-a-day",
+    summary: "Speaking in Berlin, Jensen Huang told investors the selloff would pass, after Nvidia fell for a third straight session on worries about AI borrowing costs and returns. GTC Berlin runs Oct 20–22.",
+    read: "Management is leaning against the panic, but a CEO's reassurance rarely turns a sector rout by itself.",
+    impacts: [{ t: "NVDA", d: 0.5 }] },
+  { id: "dc-delays", cat: "Tech", outlet: "The Deep Dive", date: "2026-10-18", title: "One Tracker Found 47 Troubled US Data Centres, Another Found 75 in Just One Quarter", url: "https://thedeepdive.ca/one-tracker-found-47-troubled-us-data-centres-another-found-75-in-just-one-quarter/",
+    summary: "A Financial Times investigation counted at least 47 major U.S. data-center projects delayed, withdrawn or blocked in 2026; Bernstein judged about 35% of the planned pipeline credibly executable. Microsoft pulled out of renting about 23,000 Nvidia chips at a planned UK site.",
+    read: "Fewer data centers getting built means fewer chips and less new power demand than the AI story assumed.",
+    impacts: [{ t: "Semis", d: -1 }, { t: "NVDA", d: -0.5 }, { t: "Power", d: -1 }] },
+  { id: "bofa-cisco", cat: "Tech", outlet: "Benzinga", date: "2026-10-17", title: "Nvidia, Micron, Broadcom Trade Like Post-Crash Cisco: BofA", url: "https://www.benzinga.com/markets/tech/26/10/62414052/nvidia-micron-broadcom-cisco-dot-com-bank-of-america",
+    summary: "Bank of America says Nvidia, Broadcom and Micron trade near 13 times forward earnings, about where Cisco traded after the dot-com crash. Micron fell about 13% on the week after a record close on Oct 7.",
+    read: "A sign that much of the bad news is already in the price, at least on earnings estimates that hold up.",
+    impacts: [{ t: "NVDA", d: 0.5 }, { t: "MU", d: 0.5 }, { t: "AVGO", d: 0.5 }] },
+  { id: "avgo-ai", cat: "Tech", outlet: "The Motley Fool", date: "2026-10-16", title: "Will Broadcom Rejoin the $2 Trillion Club in 2027?", url: "https://fool.com/investing/2026/10/16/will-broadcom-rejoin-the-2-trillion-club-in-2027",
+    summary: "Broadcom's AI chip revenue was $10.8 billion last quarter, up 143% from a year earlier, and it guided to $16 billion this quarter. The stock is about 26% below its June peak.",
+    read: "The business is growing far faster than the share price suggests.",
+    impacts: [{ t: "AVGO", d: 1 }] },
+  { id: "amd-drop", cat: "Tech", outlet: "ad-hoc-news", date: "2026-10-16", title: "AMD's 6.2% Pullback Puts AI Financing Costs Under the Microscope", url: "https://www.ad-hoc-news.de/boerse/news/unternehmensnachrichten/amd-s-6-2-prozent-pullback-puts-ai-financing-costs-under-the-microscope/70353798",
+    summary: "AMD fell about 6% as rate worries and CoreWeave's debt troubles hit chip stocks, alongside questions about OpenAI's revenue figures.",
+    read: "AMD's growth story leans on AI customers whose ability to pay is now being questioned.",
+    impacts: [{ t: "AMD", d: -1 }] },
+  { id: "amd-helion", cat: "Tech", outlet: "AMD", date: "2026-10-12", title: "Introducing AMD Helion, Agentic AI Compute at Rack Scale", url: "https://newsroom.amd.com/news/open-rack-blueprint-scale-agentic-ai/",
+    summary: "AMD introduced Helion, an open rack design for agentic AI workloads, with partner-built systems due in November 2026.",
+    read: "A new product cycle aimed at enterprise AI demand rather than one or two giant buyers.",
+    impacts: [{ t: "AMD", d: 0.5 }] },
+  { id: "aapl-jpm", cat: "Tech", outlet: "AppleInsider", date: "2026-10-12", title: "iPhone 18 Pro demand is up on last year, says JP Morgan", url: "https://appleinsider.com/articles/26/10/12/jp-morgan-dismisses-iphone-cuts-report-hikes-aapl-target-to-360",
+    summary: "JPMorgan raised its Apple target to $360 from $340, saying iPhone 18 Pro lead times run slightly ahead of last year despite reports of supplier order cuts. It expects the foldable iPhone Duo, due late October, to help the holiday quarter.",
+    read: "An analyst pushing back on the main bear argument, with a new product on the way.",
+    impacts: [{ t: "AAPL", d: 1 }] },
+  { id: "msft-model", cat: "Tech", outlet: "Yahoo Finance", date: "2026-10-16", title: "Microsoft's AI Chief Says It Built a Better Model Than OpenAI's With a Quarter of the Computing Power", url: "https://finance.yahoo.com/technology/ai/articles/microsoft-ai-chief-says-built-125729863.html",
+    summary: "Microsoft AI says it finished pre-training MAI-Base-2 on Oct 15 and that it beats OpenAI's latest model on about a quarter of the compute. No public benchmarks back the claim yet.",
+    read: "Less dependence on OpenAI and cheaper AI would help margins, if the claim holds up.",
+    impacts: [{ t: "MSFT", d: 0.5 }] },
+  { id: "xom-refining", cat: "Business", outlet: "BOE Report", date: "2026-10-16", title: "ExxonMobil signals $4.5 billion refining earnings boost as margins soar", url: "https://boereport.com/2026/10/16/exxonmobil-signals-4-5-billion-refining-earnings-boost-as-margins-soar",
+    summary: "Exxon said higher refining margins could lift third-quarter refining profit by $4.5 billion from the second quarter, partly offset by a roughly $1.3 billion upstream hit. Asset sales add about $700 million. Results come Oct 30.",
+    read: "The fuel-price spike is flowing straight into Exxon's earnings.",
+    impacts: [{ t: "XOM", d: 2 }] },
+  { id: "xom-ms", cat: "Business", outlet: "ad-hoc-news", date: "2026-10-15", title: "ExxonMobil stock: Morgan Stanley lifts target to USD 185 for ExxonMobil stock", url: "https://ad-hoc-news.de/boerse/news/corporate-news/exxonmobil-stock-morgan-stanley-lifts-target-to-usd-185-for-exxonmobil-stock/70341946",
+    summary: "Morgan Stanley raised its Exxon target to $185 from $177 and kept an Overweight rating.",
+    read: "Analysts are still raising targets after the run-up.",
+    impacts: [{ t: "XOM", d: 0.5 }] },
+  { id: "rtx-sm6", cat: "Business", outlet: "USNI News", date: "2026-10-02", title: "Navy Contracts RTX for $24.4B Standard Missile-6 Deal", url: "https://news.usni.org/2026/10/02/navy-contracts-rtx-for-24-4b-standard-missile-6-deal",
+    summary: "A multiyear Navy contract worth up to $24.4 billion covers more than 1,900 SM-6 interceptors over five years, as the Pentagon refills stockpiles drawn down by Middle East fighting.",
+    read: "Years of locked-in missile revenue. Congress still has to appropriate the money.",
+    impacts: [{ t: "RTX", d: 2 }] },
+  { id: "rtx-sm3", cat: "Business", outlet: "Investing.com (Reuters)", date: "2026-10-08", title: "RTX's Raytheon wins up to $6.3 billion US missile contract", url: "https://www.investing.com/news/stock-market-news/rtxs-raytheon-wins-up-to-63-billion-us-missile-contract-4939842",
+    summary: "Raytheon won a deal worth up to $6.3 billion for Standard Missile-3 Block IB interceptors, built mainly in Tucson and Huntsville.",
+    read: "A second large interceptor order in a week; missile defense is RTX's strongest line right now.",
+    impacts: [{ t: "RTX", d: 1.5 }] },
+  { id: "noc-cca", cat: "Business", outlet: "The Motley Fool", date: "2026-10-17", title: "USAF Doesn't Want Northrop Grumman's Stealth Drone", url: "https://www.fool.com/investing/2026/10/17/usaf-doesnt-want-northrop-grummans-stealth-drone/",
+    summary: "The Air Force picked Anduril and General Atomics to build its Collaborative Combat Aircraft, passing over Northrop's entry. Northrop stays on the drone-software vendor list and is continuing its own drone.",
+    read: "A lost growth program, and a sign newer defense companies are winning share.",
+    impacts: [{ t: "NOC", d: -1.5 }] },
+  { id: "amzn-aws", cat: "Business", outlet: "The Motley Fool", date: "2026-10-16", title: "Amazon Is 11% Below Its High Heading Into Earnings on Oct. 29. Here's the 1 Number That Will Decide What Happens Next.", url: "https://fool.com/investing/2026/10/16/amazon-is-12-below-its-high-heading-into-earnings",
+    summary: "Amazon reports Oct 29. AWS grew at its fastest rate in 18 quarters last quarter, and investors want to see that hold.",
+    read: "Cloud growth is carrying the stock while shoppers are squeezed.",
+    impacts: [{ t: "AMZN", d: 0.5 }] },
+  { id: "nflx-cuts", cat: "Business", outlet: "CNBC", date: "2026-10-14", title: "Netflix to lay off roughly 1,000 employees, or 6% of workforce", url: "https://www.cnbc.com/2026/10/14/netflix-layoffs.html",
+    summary: "Netflix is cutting about 1,000 jobs, roughly 6% of staff, mostly in product, tech, legal and HR, amid slower growth and competition for viewers' time. It says it remains on track for its full-year forecast.",
+    read: "Cost cuts protect margins, but they confirm growth is slowing.",
+    impacts: [{ t: "NFLX", d: -0.5 }] },
+  { id: "meta-capex", cat: "Business", outlet: "Yahoo Finance (Benzinga)", date: "2026-10-13", title: "Mark Zuckerberg Defends Meta's AI CapEx, Ready to 'Write This Check' for up to '$200 Billion' to Dominate 'Decades to Come'", url: "https://finance.yahoo.com/technology/ai/articles/mark-zuckerberg-defends-metas-ai-173015808.html",
+    summary: "Zuckerberg defended committing $100–200 billion to AI infrastructure; Meta's 2026 capital spending is guided as high as $145 billion.",
+    read: "Good for chip suppliers, but investors are punishing big AI spenders this month. Meta's Oct 21 report has to show returns.",
+    impacts: [{ t: "META", d: -0.5 }, { t: "Semis", d: 0.5 }] },
+  { id: "nem-gold", cat: "Markets", outlet: "Quiver Quantitative", date: "2026-10-15", title: "Newmont rises as gold strengthens and investors look ahead to earnings", url: "https://www.quiverquant.com/news/Newmont+rises+as+gold+strengthens+and+investors+look+ahead+to+earnings",
+    summary: "Gold climbed more than 1% on Oct 15 as the dollar weakened and Treasury yields eased. Newmont reports Oct 22.",
+    read: "Gold is firming again after a long slide from its January record.",
+    impacts: [{ t: "Gold", d: 0.5 }, { t: "NEM", d: 0.5 }] },
+  { id: "tsla-deliv", cat: "Business", outlet: "Tesla Oracle", date: "2026-10-03", title: "Tesla (TSLA) Q3 2026 vehicle deliveries grew 1.3% QoQ and dropped by 2.1% YoY, energy business also slows down", url: "https://www.teslaoracle.com/2026/10/03/tesla-tsla-q3-2026-vehicle-deliveries-grew-1-3-qoq-and-dropped-by-2-1-yoy-energy-business-also-slows-down/",
+    summary: "Tesla delivered 486,532 vehicles in the third quarter, 2.1% fewer than a year earlier, and its energy business slowed.",
+    read: "The core car business is shrinking while the stock rides on robotaxi hopes.",
+    impacts: [{ t: "TSLA", d: -0.5 }] },
 ];
 
 const STOCKS = [
-  { t: "XOM", name: "Exxon Mobil", sector: "Energy", px: 178.98, chg: 2.5, lo: 110.39, hi: 177.43, ytd: { v: 37.8, asof: "Sep 28, total return" }, next: null,
-    thesis: "Brent near $110 and Hormuz flows about 30% below pre-war levels keep upstream cash flow high. Exxon set a 52-week high on Oct 16.",
+  { t: "XOM", name: "Exxon Mobil", sector: "Energy", px: 178.98, chg: 2.5, lo: 110.39, hi: 177.43, ytd: { v: 37.8, asof: "Sep 28, total return" }, next: { date: "2026-10-30", label: "Earnings Oct 30" },
+    thesis: "Brent near $110 and Hormuz flows about 30% below pre-war levels keep upstream cash flow high. Exxon set a 52-week high on Oct 16, and it says refining margins could add $4.5 billion to Q3 profit.",
     risk: "Washington is trying to push oil down with Russia sanction waivers, and a ceasefire or Saudi pipeline expansion could knock crude back quickly.",
-    src: [{ l: "Price (Trading Economics)", u: "https://tradingeconomics.com/xom:us" }, { l: "52-wk range (Motley Fool)", u: "https://www.fool.com/coverage/better-buy/2026/10/14/chevron-vs-exxonmobil-which-energy-stock-is-a-better-buy-in-2026/" }, { l: "YTD (FinanceCharts)", u: "https://www.financecharts.com/compare/XOM,COP,CVX" }] },
+    src: [{ l: "Price (Trading Economics)", u: "https://tradingeconomics.com/xom:us" }, { l: "52-wk range (Motley Fool)", u: "https://www.fool.com/coverage/better-buy/2026/10/14/chevron-vs-exxonmobil-which-energy-stock-is-a-better-buy-in-2026/" }, { l: "YTD (FinanceCharts)", u: "https://www.financecharts.com/compare/XOM,COP,CVX" }, { l: "Earnings date (StockTitan)", u: "https://stocktitan.net/news/XOM/exxon-mobil-to-release-third-quarter-2026-financial-f4qol9hm3y0t.html" }] },
   { t: "CVX", name: "Chevron", sector: "Energy", px: 224.99, chg: 2.6, lo: 146.49, hi: 225.31, ytd: { v: 46.75, asof: "Oct 13" }, next: { date: "2026-10-30", label: "Earnings Oct 30" },
     thesis: "Same oil tailwind. Chevron is up about 47% this year and closed at a 52-week high on Oct 16.",
     risk: "Already priced near its highs, so any retreat in crude hits quickly. Reports Oct 30.",
@@ -682,17 +880,17 @@ const STOCKS = [
     thesis: "The Iran conflict and steady Pentagon budgets support demand. Shares jumped 3.65% on Oct 16 but sit about 20% below their 52-week high.",
     risk: "Reports Oct 22. RBC recently cut its price target to $550, about where the stock trades.",
     src: [{ l: "Price & range (Morningstar)", u: "https://www.morningstar.com/stocks/xnys/lmt/quote" }, { l: "YTD (Macrotrends)", u: "https://www.macrotrends.net/stocks/charts/LMT/lockheed-martin/stock-price-history" }, { l: "RBC target (ad-hoc-news)", u: "https://www.ad-hoc-news.de/boerse/news/corporate-news/lockheed-martin-stock-royal-bank-of-canada-cuts-target-for-lockheed-martin-stock-to-usd-550-00/70342259" }] },
-  { t: "RTX", name: "RTX", sector: "Defense", px: 193.92, chg: 3.73, lo: 156.1, hi: 226.88, next: null,
-    thesis: "Restocking Patriot missiles and radars ties RTX most directly to an air-defense war. Up 3.7% on Oct 16 and mid-range.",
-    risk: "A ceasefire would cool the trade. Its Q3 report date wasn't confirmed in the sources found.",
-    src: [{ l: "Price & range (Morningstar)", u: "https://www.morningstar.com/stocks/xnys/rtx/quote" }, { l: "Patriot exposure (Investing.com)", u: "https://www.investing.com/news/stock-market-news/best-defense-stocks-to-buy-as-usiran-conflict-enters-ninth-day-93CH-4800915" }] },
+  { t: "RTX", name: "RTX", sector: "Defense", px: 193.92, chg: 3.73, lo: 156.1, hi: 226.88, next: { date: "2026-10-20", label: "Earnings Oct 20" },
+    thesis: "Restocking Patriot missiles and radars ties RTX most directly to an air-defense war, and it won missile contracts worth up to about $30 billion this month. Up 3.7% on Oct 16.",
+    risk: "Reports Oct 20 before the open. A ceasefire would cool the trade, and Congress hasn't yet funded all of the new missile orders.",
+    src: [{ l: "Price & range (Morningstar)", u: "https://www.morningstar.com/stocks/xnys/rtx/quote" }, { l: "Patriot exposure (Investing.com)", u: "https://www.investing.com/news/stock-market-news/best-defense-stocks-to-buy-as-usiran-conflict-enters-ninth-day-93CH-4800915" }, { l: "Earnings date (MarketAlleys)", u: "https://www.marketalleys.com/post/marketalleys-week-ahead-2026-10-19" }] },
   { t: "NOC", name: "Northrop Grumman", sector: "Defense", px: 519.86, chg: 4.05, lo: 470.06, hi: 774.0, next: null,
     thesis: "The deepest discount in defense, 33% below its 52-week high, with a record backlog. Up 4% on Oct 16.",
-    risk: "Long-cycle strategic programs react slowly to wartime demand, and the price sits in the bottom sixth of its range.",
+    risk: "Lost the Air Force's drone competition to Anduril and General Atomics on Oct 17, and the price sits in the bottom sixth of its range.",
     src: [{ l: "Price & range (StockAnalysis)", u: "https://stockanalysis.com/stocks/noc/" }, { l: "Backlog (MarketBeat)", u: "https://www.marketbeat.com/articles/defense-earnings-show-readiness-now-and-modernization-ahead/" }] },
   { t: "NVDA", name: "Nvidia", sector: "Semis", px: 214.13, chg: -1.43, lo: 164.27, hi: 243.37, next: null,
     thesis: "Fell less than peers in the chip rout, and TSMC's record quarter says AI demand is intact.",
-    risk: "Its biggest customers (Microsoft with Maia, OpenAI with Broadcom) are building their own chips, and CoreWeave's debt stress hits an important buyer.",
+    risk: "Its biggest customers (Microsoft with Maia, OpenAI with Broadcom) are building their own chips, and CoreWeave's debt stress and stalled data-center projects threaten future orders.",
     src: [{ l: "Price & range (Morningstar)", u: "https://www.morningstar.com/stocks/xnas/nvda/quote" }] },
   { t: "TSM", name: "Taiwan Semiconductor", sector: "Semis", px: 412.61, chg: -2.28, lo: 266.82, hi: 487.47, earn: { s: 1, note: "Record Q3 profit, +68.7%, above consensus" }, next: null,
     thesis: "A sixth straight record quarter with a 66.4% gross margin, and the shares are 15% below their high after the sector rout.",
@@ -711,7 +909,7 @@ const STOCKS = [
     risk: "Memory led the rout after China's CXMT advanced, which threatens memory pricing. The biggest swings of any stock here.",
     src: [{ l: "Price & range (Yahoo Finance)", u: "https://finance.yahoo.com/quote/MU/" }, { l: "YTD (Chartrow)", u: "https://chartrow.com/sp500/stock-performance" }] },
   { t: "AAPL", name: "Apple", sector: "BigTech", px: 343.46, chg: 0.43, lo: 243.42, hi: 348.15, next: null,
-    thesis: "A record close on Oct 16 while the rest of big tech fell. JPMorgan raised its target to $360 on Oct 13.",
+    thesis: "A record close on Oct 16 while the rest of big tech fell. JPMorgan raised its target to $360 on Oct 12, saying iPhone 18 Pro demand is running ahead of last year.",
     risk: "Trades above the $340 consensus target, so there is little discount left.",
     src: [{ l: "Close (StockAnalysis)", u: "https://stockanalysis.com/stocks/aapl/" }, { l: "52-wk range (Yahoo Finance)", u: "https://finance.yahoo.com/quote/AAPL/" }, { l: "Targets (MarketBeat)", u: "https://www.marketbeat.com/instant-alerts/price-apple-nasdaq-aapl-sets-new-52-week-high-after-analyst-upgrade-2026-10-13/" }] },
   { t: "MSFT", name: "Microsoft", sector: "BigTech", px: 529.05, chg: -1.93, lo: 349.2, hi: 553.72, next: null,
@@ -730,10 +928,10 @@ const STOCKS = [
     thesis: "The deepest discount of any stock here, 42% below its 52-week high. Options imply about a 9% move on earnings.",
     risk: "Reports Oct 20 after 1,000 job cuts and slowing growth. It fell 7% after its last report.",
     src: [{ l: "Price & range (TradingKey)", u: "https://www.tradingkey.com/analysis/stocks/us-stocks/262220900-netflix-stock-forecast-layoffs-q3-earnings-75-trendline-october-16-2026-tradingkey" }] },
-  { t: "AMZN", name: "Amazon", sector: "Consumer", px: 250.0, chg: -1.87, lo: 196.0, hi: 287.2, flag: "Price is from a single Yahoo Finance listing; treat as approximate.", next: null,
+  { t: "AMZN", name: "Amazon", sector: "Consumer", px: 250.0, chg: -1.87, lo: 196.0, hi: 287.2, flag: "Price is from a single Yahoo Finance listing; treat as approximate.", next: { date: "2026-10-29", label: "Earnings Oct 29" },
     thesis: "AWS and its Anthropic partnership give it AI exposure without chip-cycle risk.",
     risk: "Consumer discretionary is the weakest sector this year as fuel and inflation squeeze shoppers.",
-    src: [{ l: "Price & range (Yahoo Finance)", u: "https://finance.yahoo.com/quote/AMZN/" }] },
+    src: [{ l: "Price & range (Yahoo Finance)", u: "https://finance.yahoo.com/quote/AMZN/" }, { l: "Earnings date (Motley Fool)", u: "https://fool.com/investing/2026/10/16/amazon-is-12-below-its-high-heading-into-earnings" }] },
   { t: "TSLA", name: "Tesla", sector: "Consumer", px: 354.72, chg: -2.13, lo: 297.38, hi: 498.83, next: { date: "2026-10-21", label: "Earnings Oct 21" },
     thesis: "29% below its 52-week high.",
     risk: "Reports Oct 21 with EPS expected down about 14.5% from a year ago, and estimates cut about 18% over 90 days.",
@@ -773,10 +971,10 @@ const HEADWINDS = [
 const BASE_RATES = [
   { big: "+6.6%", unit: "avg", h: "S&P 500 in Q4 of midterm years", p: "More than double the 2.9% average for all fourth quarters. Since 1940 the index rose in 86% of midterm Q4s. The exceptions were 1978, 2002 and 2018, when it fell more than 13%.", use: "Sets the market backdrop. Bank of America warns rate and energy shocks could outweigh it this year.", src: [{ l: "Webull / J.P. Morgan AM", u: "https://www.webull.com/news/15578174719935488" }, { l: "LPL Research", u: "https://www.lpl.com/research/blog/weak-september-seasonals-precede-strong-midterm-trends.html" }] },
   { big: "78.9%", unit: "of Octobers", h: "October gains in midterm years", p: "October has usually been the best month for stocks in midterm years.", use: "Short-run seasonal context, not a factor in the score.", src: [{ l: "Fortune", u: "https://fortune.com/2026/09/23/in-midterm-years-october-usually-best-month-for-stocks-gains-78-9-of-the-time" }] },
-  { big: "52-wk", unit: "highs", h: "Stocks near their highs keep winning", p: "Stocks trading close to their 52-week high have tended to outperform over the following 6 to 12 months.", use: "The basis of the Trend factor.", src: [{ l: "George & Hwang, Journal of Finance (2004)", u: "https://doi.org/10.1111/j.1540-6261.2004.00695.x" }] },
-  { big: "1-mo", unit: "reversal", h: "Last month's losers tend to bounce", p: "Over horizons of about a month, the biggest losers have tended to rebound and the biggest winners to give some back.", use: "The basis of the Discount factor, weighted most in the Aggressive profile.", src: [{ l: "Jegadeesh, Journal of Finance (1990)", u: "https://doi.org/10.1111/j.1540-6261.1990.tb05110.x" }] },
+  { big: "52-wk", unit: "highs", h: "Stocks near their highs keep winning", p: "Stocks trading close to their 52-week high have tended to outperform over the following 6 to 12 months.", use: "The basis of the Price trend factor.", src: [{ l: "George & Hwang, Journal of Finance (2004)", u: "https://doi.org/10.1111/j.1540-6261.2004.00695.x" }] },
+  { big: "1-mo", unit: "reversal", h: "Last month's losers tend to bounce", p: "Over horizons of about a month, the biggest losers have tended to rebound and the biggest winners to give some back.", use: "The basis of the Room to rebound factor, weighted most in the Aggressive style.", src: [{ l: "Jegadeesh, Journal of Finance (1990)", u: "https://doi.org/10.1111/j.1540-6261.1990.tb05110.x" }] },
   { big: "60", unit: "days", h: "Earnings surprises drift", p: "Prices keep moving in the direction of an earnings surprise for roughly 60 trading days after the report.", use: "The basis of the Earnings factor: Goldman and UnitedHealth score highest.", src: [{ l: "Bernard & Thomas, Journal of Accounting Research (1989)", u: "https://doi.org/10.2307/2491062" }] },
-  { big: "8", unit: "days", h: "The chip losing streak", p: "The Philadelphia Semiconductor Index fell eight straight sessions through Oct 16, its longest run since 2008. A nine-session streak last ended in May 2006.", use: "Few precedents. Shows up as a high Discount score for chip stocks, offset by weak News.", src: [{ l: "24/7 Wall St.", u: "https://247wallst.com/investing/2026/10/17/oil-topped-110-as-tech-stocks-lost-1-trillion-in-a-day/" }] },
+  { big: "8", unit: "days", h: "The chip losing streak", p: "The Philadelphia Semiconductor Index fell eight straight sessions through Oct 16, its longest run since 2008. A nine-session streak last ended in May 2006.", use: "Few precedents. Shows up as high Room to rebound for chip stocks, offset by negative news sentiment.", src: [{ l: "24/7 Wall St.", u: "https://247wallst.com/investing/2026/10/17/oil-topped-110-as-tech-stocks-lost-1-trillion-in-a-day/" }] },
 ];
 
 /* ---------- Helpers ---------- */
@@ -791,6 +989,8 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
 };
 const TARGET_LABEL = t => SECTORS[t] ? SECTORS[t].label : t;
+const TONE_LABEL = { positive: "Positive", negative: "Negative", mixed: "Mixed", neutral: "Neutral" };
+const VERDICTS = [{ k: "all", label: "All" }, { k: "buy", label: "Buy" }, { k: "acc", label: "Lean buy" }, { k: "hold", label: "Hold" }, { k: "avoid", label: "Avoid" }];
 
 /* ---------- State ---------- */
 const state = {
@@ -800,6 +1000,8 @@ const state = {
   open: null,
   wireTab: "All",
   pasted: [],
+  search: "",
+  verdict: "all",
 };
 (() => {
   const saved = store.get("h2h.prefs", null);
@@ -814,9 +1016,23 @@ const state = {
 const allHeadlines = () => [...state.pasted, ...HEADLINES];
 let ranked = [];
 
-/* ---------- Render: tape ---------- */
+/* ---------- Masthead extras ---------- */
+function renderStale() {
+  const days = Math.floor((Date.now() - toDate(ASOF)) / dayMs);
+  const el = $("#stale");
+  if (days > 3) {
+    el.innerHTML = `<b>${days} days old.</b> <span>Prices and news here are from Oct 16–18, 2026 and have moved since. Paste fresh headlines under News to update the sentiment.</span>`;
+    el.hidden = false;
+  }
+}
+function renderHowto() {
+  if (store.get("h2h.howto", true)) $("#howto").hidden = false;
+}
+$("#howto-x").addEventListener("click", () => { $("#howto").hidden = true; store.set("h2h.howto", false); });
+
+/* ---------- Tape ---------- */
 function renderTape() {
-  $("#tape").innerHTML = TAPE.map((x, i) => `
+  $("#tape").innerHTML = TAPE.map(x => `
     <div class="tick">
       <span class="lbl"><span>${esc(x.lbl)}</span><a href="${esc(x.url)}" target="_blank" rel="noopener" aria-label="Source for ${esc(x.lbl)}">src</a></span>
       <span class="val">${esc(x.val)}</span>
@@ -824,7 +1040,7 @@ function renderTape() {
     </div>`).join("");
 }
 
-/* ---------- Render: controls ---------- */
+/* ---------- Controls ---------- */
 function renderControls() {
   const btns = Object.entries(PROFILES).map(([k, p]) => `<button type="button" data-profile="${k}" aria-pressed="${state.profile === k}">${p.label}</button>`);
   btns.push(`<button type="button" data-profile="custom" aria-pressed="${state.profile === "custom"}">Custom</button>`);
@@ -835,12 +1051,15 @@ function renderControls() {
       <span class="hint">${f.hint}</span></label>`).join("") + `
     <label for="w-aversion"><span class="top"><b>Risk aversion</b><span class="num" id="wv-aversion">${state.aversion}</span></span>
       <input type="range" id="w-aversion" min="0" max="100" step="10" value="${state.aversion}" data-w="aversion">
-      <span class="hint">How hard to penalize volatility and earnings dates</span></label>`;
+      <span class="hint">How hard to mark down volatile stocks and upcoming earnings</span></label>`;
+  syncControls();
 }
 function syncControls() {
   document.querySelectorAll("#profiles button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.profile === state.profile)));
   for (const { k } of FACTORS) { $("#w-" + k).value = state.weights[k]; $("#wv-" + k).textContent = state.weights[k]; }
   $("#w-aversion").value = state.aversion; $("#wv-aversion").textContent = state.aversion;
+  const p = PROFILES[state.profile];
+  $("#profile-desc").innerHTML = p ? `<b>${p.label}:</b> ${esc(p.desc)}` : `<b>Custom:</b> your own weights, set under "Fine-tune the formula".`;
 }
 $("#profiles").addEventListener("click", e => {
   const b = e.target.closest("button[data-profile]"); if (!b) return;
@@ -857,33 +1076,41 @@ $("#sliders").addEventListener("input", e => {
   state.profile = "custom";
   syncControls(); savePrefs(); renderRanking();
 });
+$("#search").addEventListener("input", e => { state.search = e.target.value.trim().toLowerCase(); renderBook(); });
+$("#filters").addEventListener("click", e => {
+  const b = e.target.closest("button[data-v]"); if (!b) return;
+  state.verdict = b.dataset.v; renderBook();
+});
 function savePrefs() { store.set("h2h.prefs", { profile: state.profile, weights: state.weights, aversion: state.aversion }); }
 
-/* ---------- Render: ranking ---------- */
-function factorCols(r) {
-  return FACTORS.map(({ k, label, short }) => {
-    const v = r.f[k], w = state.weights[k];
-    const tip = v == null ? `${label}: no data` : `${label}: ${Math.round(v)} / 100 · weight ${w}`;
-    return `<span class="fx" data-tip="${esc(tip)}"><span class="col ${v == null ? "na" : ""}">${v == null ? "" : `<i style="height:${clamp(v)}%; opacity:${w ? 1 : .3}"></i>`}</span><b>${short}</b></span>`;
-  }).join("");
+/* ---------- Ranking ---------- */
+function meterHTML(f) {
+  const st = sentimentOf(f.news);
+  const good = f.hits.filter(x => x.c > 0).length, bad = f.hits.filter(x => x.c < 0).length;
+  const segs = [0, 1, 2, 3, 4].map(i => `<i class="${i === st.step ? "on " + st.cls : ""}"></i>`).join("");
+  const cnt = good + bad ? `${good} good · ${bad} bad` : "no stories";
+  return `<span class="senti" data-tip="${esc(`News sentiment ${Math.round(f.news)}/100 from ${good + bad} stories touching this stock or its sector`)}"><span class="lab ${st.cls}">${st.label}</span><span class="meter" aria-hidden="true">${segs}</span><span class="cnt">${cnt}</span></span>`;
+}
+function reasonChips(r, max = 3) {
+  return reasonsFor(r).slice(0, max).map(x => `<span class="why-chip ${x.kind}">${esc(x.text)}</span>`).join("");
 }
 function rangeCell(r) {
   const s = r.s, hi = Math.max(s.hi, s.px), lo = Math.min(s.lo, s.px);
   const pos = (s.px - lo) / (hi - lo) * 100;
   const chg = s.chg == null ? `<span class="muted">${esc(s.pxNote || "")}</span>` : `<span class="${s.chg >= 0 ? "up" : "down"}">${s.chg >= 0 ? "▲" : "▼"}${fmt(Math.abs(s.chg), 2)}%</span>`;
   return `<span class="px"><span>${money(s.px)}</span>${chg}</span>
-    <span class="rng" data-tip="${esc(`52-week range ${money(lo)} – ${money(hi)}. Price sits ${Math.round(pos)}% of the way up, ${fmt(r.f.offHigh * 100, 1)}% below the high.`)}"><i style="left:${clamp(pos)}%"></i></span>
+    <span class="rng" data-tip="${esc(`52-week range ${money(lo)} – ${money(hi)}. ${fmt(r.f.offHigh * 100, 1)}% below the high.`)}"><i style="left:${clamp(pos)}%"></i></span>
     <span class="ends"><span>${money(lo)}</span><span>${money(hi)}</span></span>`;
 }
-function rowHTML(r, i) {
+function rowHTML(r) {
   const s = r.s, open = state.open === s.t;
   return `<div role="listitem"><button type="button" class="row" data-t="${s.t}" aria-expanded="${open}"${open ? ` aria-controls="d-${s.t}"` : ""}>
-    <span class="c-rk">${i + 1}</span>
-    <span class="c-nm"><span class="tkr">${s.t}</span><span class="nm">${esc(s.name)} · ${esc(SECTORS[s.sector].label)}</span>${r.f.eventSoon ? `<span class="ev">● ${esc(s.next.label)}</span>` : ""}</span>
-    <span class="c-sc"><span class="line"><span class="tier ${r.tier.k}">${r.tier.label}</span><span class="v">${fmt(r.score, 1)}</span></span><span class="bar"><i style="width:${clamp(r.score)}%"></i></span></span>
-    <span class="c-fx">${factorCols(r)}</span>
+    <span class="c-rk">${r.rank}</span>
+    <span class="c-nm"><span class="id"><span class="tkr">${s.t}</span><span class="nm">${esc(s.name)}</span></span></span>
+    <span class="c-why reasons">${reasonChips(r)}</span>
+    <span class="c-sc"><span class="line"><span class="tier ${r.tier.k}">${r.tier.label}</span><span class="v">${fmt(r.score, 0)}</span></span><span class="bar"><i style="width:${clamp(r.score)}%"></i></span></span>
+    <span class="c-se">${meterHTML(r.f)}</span>
     <span class="c-rg">${rangeCell(r)}</span>
-    <span class="c-sw" data-tip="Typical 3-month move (one standard deviation), estimated from the 52-week range">±${Math.round(r.f.swing3m * 100)}%</span>
     <span class="c-ch" aria-hidden="true">›</span>
   </button>${open ? detailHTML(r) : ""}</div>`;
 }
@@ -891,89 +1118,122 @@ function detailHTML(r) {
   const s = r.s, f = r.f;
   const rows = r.parts.map(p => `<tr><td>${FACTORS.find(x => x.k === p.k).label}</td><td>${Math.round(p.v)}</td><td>${p.w}</td><td>${fmt(p.contrib, 1)}</td></tr>`).join("");
   const missing = FACTORS.filter(x => f[x.k] == null).map(x => x.label);
-  const hits = f.hits.slice(0, 6).map(({ h, c }) => `<li><span class="c ${c > 0 ? "up" : "down"}">${c > 0 ? "▲" : "▼"} ${fmt(Math.abs(c), 2)}</span><span>${h.url ? `<a href="${esc(h.url)}" target="_blank" rel="noopener">${esc(h.title)}</a>` : esc(h.title)} <span class="muted">· ${esc(h.outlet)}, ${fmtDate(h.date)}</span></span></li>`).join("");
+  const hits = f.hits.slice(0, 6).map(({ h, c }) => {
+    const direct = h.impacts.some(i => i.t === s.t);
+    return `<li><span class="tone ${c > 0 ? "positive" : "negative"}">${c > 0 ? "Good" : "Bad"}</span><span>${h.url ? `<a href="${esc(h.url)}" target="_blank" rel="noopener">${esc(h.title)}</a>` : esc(h.title)} <span class="muted">· ${esc(h.outlet)}, ${fmtDate(h.date)}${direct ? "" : ` · via ${esc(SECTORS[s.sector].label)}`}</span></span></li>`;
+  }).join("");
+  const st = sentimentOf(f.news);
   return `<div class="detail" id="d-${s.t}">
+    <p class="inshort">${esc(inShort(r, r.rank))}</p>
+    <div class="reasons">${reasonChips(r, 6)}</div>
     <div class="cols">
       <div><h4>The case</h4><p>${esc(s.thesis)}</p></div>
       <div><h4>The risk</h4><p>${esc(s.risk)}</p></div>
     </div>
-    <div class="cols">
-      <div><h4>Why it scores ${fmt(r.score, 1)}</h4>
-        <table class="ftab"><tbody>
-          <tr><td class="muted">Factor</td><td class="muted">Value</td><td class="muted">Weight</td><td class="muted">Adds</td></tr>
-          ${rows}
-          <tr><td>Risk penalty</td><td>${Math.round(f.risk)}</td><td>${state.aversion}%</td><td>−${fmt(r.penalty, 1)}</td></tr>
-          <tr class="tot"><td>Score</td><td></td><td></td><td>${fmt(r.score, 1)}</td></tr>
-        </tbody></table>
-        ${missing.length ? `<p class="muted" style="font-size:12.5px; margin-top:6px">${esc(missing.join(", "))}: no data yet, so the other weights were rescaled.</p>` : ""}
-      </div>
-      <div><h4>Headlines moving it</h4>${hits ? `<ul class="hits">${hits}</ul>` : `<p class="muted">No headline this week touches ${s.t} or its sector.</p>`}
-        <p class="muted" style="font-size:12.5px; margin-top:6px">Net news input ${signed(f.newsRaw, 2)} → News score ${Math.round(f.news)}.</p></div>
-    </div>
+    <div><h4>News behind the sentiment: ${esc(st.label.toLowerCase())}</h4>${hits ? `<ul class="hits">${hits}</ul>` : `<p class="muted">No story this week touches ${s.t} or its sector.</p>`}${f.hits.length > 6 ? `<p class="muted" style="font-size:12.5px; margin-top:6px">Plus ${f.hits.length - 6} smaller sector-wide stories.</p>` : ""}</div>
     <div class="facts">
-      <span>Close <b>${money(s.px)}</b>${s.pxNote ? ` (${esc(s.pxNote)})` : ""}</span>
-      <span>52-wk <b>${money(s.lo)}–${money(Math.max(s.hi, s.px))}</b></span>
-      ${s.ytd ? `<span>YTD <b>${signed(s.ytd.v, 1)}%</b> <span class="muted">(${esc(s.ytd.asof)})</span></span>` : ""}
-      ${s.earn ? `<span>Q3: <b>${esc(s.earn.note)}</b></span>` : ""}
-      <span>Next: <b>${s.next ? esc(s.next.label) : "no date found"}</b></span>
-      <span>Annual volatility ≈ <b>${Math.round(f.sigma * 100)}%</b></span>
+      <div><span>Close</span><b>${money(s.px)}${s.pxNote ? ` (${esc(s.pxNote)})` : ""}</b></div>
+      <div><span>52-week range</span><b>${money(s.lo)}–${money(Math.max(s.hi, s.px))}</b></div>
+      ${s.ytd ? `<div><span>This year</span><b>${signed(s.ytd.v, 1)}%</b> <small class="muted">${esc(s.ytd.asof)}</small></div>` : ""}
+      <div><span>Typical 3-month swing</span><b>±${Math.round(f.swing3m * 100)}%</b></div>
+      ${s.earn ? `<div><span>Latest quarter</span><b>${esc(s.earn.note)}</b></div>` : ""}
+      <div><span>Next event</span><b>${s.next ? esc(s.next.label) : "None found"}</b></div>
     </div>
-    <p style="font-size:13px"><b>Macro fit ${SECTORS[s.sector].fit}:</b> <span class="muted">${esc(SECTORS[s.sector].why)}</span></p>
+    <details class="math"><summary>Show the math</summary>
+      <table class="ftab"><tbody>
+        <tr class="h"><td>Factor</td><td>Score</td><td>Weight</td><td>Adds</td></tr>
+        ${rows}
+        <tr><td>Risk penalty</td><td>${Math.round(f.risk)}</td><td>${state.aversion}%</td><td>−${fmt(r.penalty, 1)}</td></tr>
+        <tr class="tot"><td>Total</td><td></td><td></td><td>${fmt(r.score, 1)}</td></tr>
+      </tbody></table>
+      ${missing.length ? `<p class="muted" style="font-size:12.5px; margin-top:6px">${esc(missing.join(", "))}: no data yet, so the other weights were rescaled.</p>` : ""}
+      <p class="muted" style="font-size:12.5px; margin-top:6px">News input ${signed(f.newsRaw, 2)} → sentiment score ${Math.round(f.news)}. Economic backdrop ${SECTORS[s.sector].fit}: ${esc(SECTORS[s.sector].why)}</p>
+    </details>
     ${s.flag ? `<p style="font-size:12.5px; color:var(--warn)">${esc(s.flag)}</p>` : ""}
     <div class="srcs">Sources: ${s.src.map(x => `<a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.l)}</a>`).join("")}</div>
   </div>`;
 }
 function renderRanking() {
   ranked = rankAll(STOCKS, allHeadlines(), state.weights, state.aversion);
-  $("#podium").innerHTML = ranked.slice(0, 3).map((r, i) => `
+  ranked.forEach((r, i) => { r.rank = i + 1; });
+  $("#podium").innerHTML = ranked.slice(0, 3).map(r => `
     <button type="button" class="pick" data-t="${r.s.t}">
-      <span class="rank">#${i + 1} · ${esc(SECTORS[r.s.sector].label)}</span>
-      <span class="hd"><span><span class="tkr">${r.s.t}</span><br><span class="nm">${esc(r.s.name)}</span></span><span class="score">${fmt(r.score, 1)}<small>score</small></span></span>
-      <span><span class="tier ${r.tier.k}">${r.tier.label}</span></span>
+      <span class="rank">#${r.rank} · ${esc(SECTORS[r.s.sector].label)}</span>
+      <span class="hd"><span><span class="tkr">${r.s.t}</span><br><span class="nm">${esc(r.s.name)}</span></span><span class="score">${fmt(r.score, 0)}<small>score / 100</small></span></span>
+      <span class="line"><span class="tier ${r.tier.k}">${r.tier.label}</span>${meterHTML(r.f).replace('class="senti"', 'class="senti" style="grid-auto-flow:column; align-items:center; gap:8px"')}</span>
+      <span class="reasons">${reasonChips(r)}</span>
       <p>${esc(r.s.thesis)}</p>
     </button>`).join("");
-  $("#book").innerHTML = `<div class="book-head" aria-hidden="true"><span>#</span><span>Stock</span><span>Signal</span><span>Factors</span><span>Price · 52-wk range</span><span>3-mo</span><span></span></div>` + ranked.map(rowHTML).join("");
   const counts = ranked.reduce((a, r) => (a[r.tier.k] = (a[r.tier.k] || 0) + 1, a), {});
-  $("#book-aside").textContent = `${ranked.length} stocks · ${counts.buy || 0} Buy · ${counts.acc || 0} Accumulate · ${counts.hold || 0} Hold · ${counts.avoid || 0} Avoid`;
+  $("#filters").innerHTML = VERDICTS.map(v => `<button type="button" data-v="${v.k}" aria-pressed="${state.verdict === v.k}">${v.label} <span class="muted">${v.k === "all" ? ranked.length : counts[v.k] || 0}</span></button>`).join("");
+  $("#book-aside").textContent = `${ranked.length} stocks · ${counts.buy || 0} Buy · ${counts.acc || 0} Lean buy · ${counts.hold || 0} Hold · ${counts.avoid || 0} Avoid`;
+  renderBook();
   renderNewsChart();
+}
+function renderBook() {
+  document.querySelectorAll("#filters button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === state.verdict)));
+  const q = state.search;
+  const list = ranked.filter(r => (state.verdict === "all" || r.tier.k === state.verdict) &&
+    (!q || r.s.t.toLowerCase().includes(q) || r.s.name.toLowerCase().includes(q) || SECTORS[r.s.sector].label.toLowerCase().includes(q)));
+  $("#book").innerHTML = `<div class="book-head" aria-hidden="true"><span>#</span><span>Stock · why</span><span>Verdict</span><span>News sentiment</span><span>Price · 52-week range</span><span></span></div>` +
+    (list.length ? list.map(rowHTML).join("") : `<p class="book-empty">No stocks match. Clear the search or pick another verdict.</p>`);
 }
 $("#book").addEventListener("click", e => {
   const row = e.target.closest(".row"); if (!row || e.target.closest("a")) return;
   state.open = state.open === row.dataset.t ? null : row.dataset.t;
-  renderRanking();
+  renderBook();
 });
 $("#podium").addEventListener("click", e => {
   const b = e.target.closest(".pick"); if (!b) return;
-  state.open = b.dataset.t; renderRanking();
+  state.open = b.dataset.t; state.verdict = "all"; state.search = ""; $("#search").value = "";
+  renderBook();
   document.querySelector(`.row[data-t="${b.dataset.t}"]`)?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
 });
 
-/* ---------- Render: wire ---------- */
-const WIRE_TABS = ["All", "Top", "Business", "Tech", "Markets", "Pasted"];
+/* ---------- News sentiment wire ---------- */
+const WIRE_TABS = ["All", "Positive", "Negative", "Mixed", "Top", "Business", "Tech", "Markets", "Pasted"];
 function chipHTML(im) {
   const n = Math.abs(im.d) >= 2.5 ? 3 : Math.abs(im.d) >= 1.5 ? 2 : 1;
   const arrow = (im.d > 0 ? "▲" : "▼").repeat(n);
   return `<span class="chip ${im.d > 0 ? "p" : "n"}" data-tip="${esc(`${TARGET_LABEL(im.t)}: ${im.d > 0 ? "+" : "−"}${Math.abs(im.d)} on a −3 to +3 scale`)}">${esc(TARGET_LABEL(im.t))} ${arrow}</span>`;
 }
+function renderMood() {
+  const all = allHeadlines();
+  const c = { positive: 0, negative: 0, mixed: 0, neutral: 0 };
+  all.forEach(h => c[toneOf(h)]++);
+  const net = all.reduce((a, h) => a + h.impacts.reduce((b, i) => b + i.d, 0) * recency(h.date), 0);
+  const mood = net > 4 ? "leaning positive" : net < -4 ? "leaning negative" : "mixed";
+  const order = ["positive", "mixed", "neutral", "negative"];
+  $("#mood").innerHTML = `
+    <p class="t">This week's tone is <b>${mood}</b> across ${all.length} stories: ${c.positive} positive, ${c.negative} negative, ${c.mixed} mixed, ${c.neutral} neutral.</p>
+    <div class="moodbar" role="img" aria-label="${c.positive} positive, ${c.mixed} mixed, ${c.neutral} neutral, ${c.negative} negative">${order.map(k => c[k] ? `<i class="${k}" style="flex:${c[k]}" data-tip="${c[k]} ${k} stories"></i>` : "").join("")}</div>
+    <div class="legend"><span style="--c: var(--pos)">Positive</span><span style="--c: var(--mixed)">Mixed</span><span style="--c: var(--mid)">Neutral</span><span style="--c: var(--neg)">Negative</span></div>`;
+}
+function matchesTab(h, t) {
+  if (t === "All") return true;
+  if (t === "Pasted") return !!h.pasted;
+  if (t === "Positive" || t === "Negative" || t === "Mixed") return toneOf(h) === t.toLowerCase();
+  return h.cat === t && !h.pasted;
+}
 function renderWire() {
+  renderMood();
   const all = allHeadlines();
   const tabs = WIRE_TABS.filter(t => t !== "Pasted" || state.pasted.length);
   if (!tabs.includes(state.wireTab)) state.wireTab = "All";
-  $("#wire-tabs").innerHTML = tabs.map(t => {
-    const n = t === "All" ? all.length : t === "Pasted" ? state.pasted.length : all.filter(h => h.cat === t && !h.pasted).length;
-    return `<button type="button" data-tab="${t}" aria-pressed="${state.wireTab === t}">${t} <span class="muted">${n}</span></button>`;
-  }).join("");
-  const list = all.filter(h => state.wireTab === "All" || (state.wireTab === "Pasted" ? h.pasted : h.cat === state.wireTab && !h.pasted))
-    .sort((a, b) => toDate(b.date) - toDate(a.date));
+  $("#wire-tabs").innerHTML = tabs.map(t => `<button type="button" data-tab="${t}" aria-pressed="${state.wireTab === t}">${t} <span class="muted">${all.filter(h => matchesTab(h, t)).length}</span></button>`).join("");
+  const list = all.filter(h => matchesTab(h, state.wireTab)).sort((a, b) => toDate(b.date) - toDate(a.date));
   $("#wire-count").textContent = `${HEADLINES.length} stories, Oct 1–18${state.pasted.length ? ` · ${state.pasted.length} pasted` : ""}`;
-  $("#wire").innerHTML = list.length ? list.map(h => `
-    <article class="story">
-      <div class="meta"><span class="cat">${esc(h.cat)}</span><span>${esc(h.outlet)}</span><span>${fmtDate(h.date)}</span>${h.pasted ? `<span class="pasted">Pasted · tagged by Claude</span>` : ""}</div>
+  $("#wire").innerHTML = list.length ? list.map(h => {
+    const tone = toneOf(h);
+    const good = h.impacts.filter(i => i.d > 0), bad = h.impacts.filter(i => i.d < 0);
+    return `<article class="story">
+      <div class="meta"><span class="tone ${tone}">${TONE_LABEL[tone]}</span><span class="cat">${esc(h.cat)}</span><span>${esc(h.outlet)}</span><span>${fmtDate(h.date)}</span>${h.pasted ? `<span class="pasted">Pasted · read by Claude</span>` : ""}</div>
       <h3>${h.url ? `<a href="${esc(h.url)}" target="_blank" rel="noopener">${esc(h.title)}</a>` : esc(h.title)}</h3>
       ${h.summary ? `<p class="sum">${esc(h.summary)}</p>` : ""}
       ${h.read ? `<p class="why"><b>Market read:</b> ${esc(h.read)}</p>` : ""}
-      ${h.impacts.length ? `<div class="chips">${h.impacts.map(chipHTML).join("")}</div>` : `<div class="chips"><span class="muted" style="font-size:12px">No direct effect on the stocks ranked here</span></div>`}
-    </article>`).join("") : `<p class="wire-empty">No headlines in this view.</p>`;
+      ${h.impacts.length ? `<div class="effects">${good.length ? `<div><span class="k">Good for</span>${good.map(chipHTML).join("")}</div>` : ""}${bad.length ? `<div><span class="k">Bad for</span>${bad.map(chipHTML).join("")}</div>` : ""}</div>` : `<p class="muted" style="font-size:12.5px">No direct effect on the stocks ranked here.</p>`}
+    </article>`;
+  }).join("") : `<p class="wire-empty">No stories in this view.</p>`;
 }
 $("#wire-tabs").addEventListener("click", e => {
   const b = e.target.closest("button[data-tab]"); if (!b) return;
@@ -994,7 +1254,7 @@ function renderNewsChart() {
   for (const r of ranked) (by[r.s.sector] ||= []).push(r);
   const items = Object.entries(by).map(([k, rs]) => {
     const v = rs.reduce((a, r) => a + r.f.news, 0) / rs.length - 50;
-    return { lab: SECTORS[k].label, v, tip: `${SECTORS[k].label}: average News score ${fmt(v + 50, 0)} across ${rs.map(r => r.s.t).join(", ")}. Macro fit ${SECTORS[k].fit}.` };
+    return { lab: SECTORS[k].label, v, tip: `${SECTORS[k].label}: ${sentimentOf(v + 50).label.toLowerCase()} (${fmt(v + 50, 0)}/100) across ${rs.map(r => r.s.t).join(", ")}` };
   }).sort((a, b) => b.v - a.v);
   $("#chart-news").innerHTML = dvRows(items, 50, v => signed(v, 0));
 }
@@ -1012,6 +1272,8 @@ function renderStatic() {
   $("#heads").innerHTML = HEADWINDS.map(h => `
     <article><span class="tkr">${h.t}</span><span class="nm">${esc(h.name)}</span><p>${esc(h.text)}</p><p class="srcs"><a href="${esc(h.u)}" target="_blank" rel="noopener">${esc(h.l)}</a></p></article>`).join("");
   $("#t-buy").textContent = TIERS.buy; $("#t-acc").textContent = TIERS.acc; $("#t-hold").textContent = TIERS.hold;
+  const outlets = [...new Set(HEADLINES.map(h => h.outlet.replace(/ \(.*\)$/, "")))];
+  $("#src-note").textContent = `${HEADLINES.length} stories from ${outlets.length} outlets that Perplexity Discover draws on, including CNBC, Yahoo Finance, CNN and Reuters, collected Oct 18, 2026.`;
   const urls = new Map();
   const add = (u, l) => { if (u && !urls.has(u)) urls.set(u, l); };
   TAPE.forEach(x => add(x.url, x.lbl));
@@ -1036,14 +1298,14 @@ function showTip(el) {
   tip.style.left = x + "px"; tip.style.top = y + "px";
 }
 const hideTip = () => { tip.hidden = true; };
-document.addEventListener("pointerover", e => { const el = e.target.closest("[data-tip]"); if (el) showTip(el); else hideTip(); });
+document.addEventListener("pointerover", e => { if (e.pointerType === "touch") return; const el = e.target.closest("[data-tip]"); if (el) showTip(el); else hideTip(); });
 document.addEventListener("focusin", e => { const el = e.target.closest("[data-tip]"); if (el) showTip(el); else hideTip(); });
 document.addEventListener("scroll", hideTip, { passive: true });
 
 /* ---------- Ask Claude ---------- */
 const SUGGESTIONS = [
-  "Build a $10,000 portfolio from the top picks for my current profile and explain the sizing.",
-  "What would have to happen for the energy and defense picks to stop working?",
+  "Build a $10,000 portfolio from the top picks for my style and explain the sizing.",
+  "Which stocks have the most positive news sentiment, and is it already priced in?",
   "Is the chip selloff a buying opportunity, and which chip stock has the best risk/reward?",
   "Which ranked stocks report earnings in the next two weeks, and how should I handle that risk?",
 ];
@@ -1056,19 +1318,19 @@ function contextBlock() {
   lines.push(`As of ${ASOF}. Prices are Oct 16, 2026 closes unless noted.`);
   lines.push(`Market: ${TAPE.map(x => `${x.lbl} ${x.val}${x.chg != null ? ` (${signed(x.chg, 2)}%)` : ""} [${x.note}]`).join("; ")}.`);
   lines.push(`Sector YTD through Oct 14: ${SECTOR_YTD.map(x => `${x.lab} ${signed(x.v, 1)}%`).join("; ")}.`);
-  lines.push(`\nModel profile: ${prof}. Weights: ${FACTORS.map(f => `${f.label} ${state.weights[f.k]}`).join(", ")}; risk aversion ${state.aversion}/100. Factors are 0-100; Score = weighted mean of available factors minus risk penalty. Tiers: Buy >= ${TIERS.buy}, Accumulate >= ${TIERS.acc}, Hold >= ${TIERS.hold}.`);
+  lines.push(`\nStyle: ${prof}. Weights: ${FACTORS.map(f => `${f.label} ${state.weights[f.k]}`).join(", ")}; risk aversion ${state.aversion}/100. Factors are 0-100; score = weighted mean of available factors minus risk penalty. Verdicts: Buy >= ${TIERS.buy}, Lean buy >= ${TIERS.acc}, Hold >= ${TIERS.hold}, else Avoid.`);
   lines.push(`\nRanking:`);
-  ranked.forEach((r, i) => {
+  ranked.forEach(r => {
     const s = r.s, f = r.f;
-    lines.push(`${i + 1}. ${s.t} (${s.name}, ${SECTORS[s.sector].label}) score ${fmt(r.score, 1)} ${r.tier.label} | News ${Math.round(f.news)}, Trend ${Math.round(f.trend)}, Discount ${Math.round(f.discount)}, Earnings ${f.earnings == null ? "n/a" : Math.round(f.earnings)}, Macro ${f.macro}, Risk ${Math.round(f.risk)} | close $${s.px}${s.pxNote ? ` (${s.pxNote})` : ""}, 52-wk $${s.lo}-$${Math.max(s.hi, s.px)}, typical 3-mo move ±${Math.round(f.swing3m * 100)}% | next: ${s.next ? s.next.label : "none found"} | case: ${s.thesis} | risk: ${s.risk}`);
+    lines.push(`${r.rank}. ${s.t} (${s.name}, ${SECTORS[s.sector].label}) score ${fmt(r.score, 1)} ${r.tier.label} | news sentiment ${sentimentOf(f.news).label} (${Math.round(f.news)}; ${f.hits.filter(x => x.c > 0).length} good, ${f.hits.filter(x => x.c < 0).length} bad stories), price trend ${Math.round(f.trend)}, room to rebound ${Math.round(f.discount)}, earnings ${f.earnings == null ? "n/a" : Math.round(f.earnings)}, backdrop ${f.macro}, risk ${Math.round(f.risk)} | close $${s.px}${s.pxNote ? ` (${s.pxNote})` : ""}, 52-wk $${s.lo}-$${Math.max(s.hi, s.px)}, typical 3-mo swing ±${Math.round(f.swing3m * 100)}% | next: ${s.next ? s.next.label : "none found"} | case: ${s.thesis} | risk: ${s.risk}`);
   });
-  lines.push(`\nSector macro reasoning: ${Object.values(SECTORS).map(x => `${x.label} (${x.fit}): ${x.why}`).join(" ")}`);
-  lines.push(`\nHeadlines (newest first):`);
+  lines.push(`\nSector backdrop reasoning: ${Object.values(SECTORS).map(x => `${x.label} (${x.fit}): ${x.why}`).join(" ")}`);
+  lines.push(`\nStories (newest first), with sentiment tags from -3 to +3:`);
   allHeadlines().slice().sort((a, b) => toDate(b.date) - toDate(a.date)).forEach(h => {
-    lines.push(`- [${h.date}, ${h.outlet}${h.pasted ? ", pasted by viewer" : ""}] ${h.title}${h.summary ? ` — ${h.summary}` : ""}${h.read ? ` Read: ${h.read}` : ""}`);
+    lines.push(`- [${h.date}, ${h.outlet}${h.pasted ? ", pasted by viewer" : ""}, ${toneOf(h)}] ${h.title}${h.summary ? ` — ${h.summary}` : ""}${h.read ? ` Read: ${h.read}` : ""} Tags: ${h.impacts.map(i => `${i.t} ${i.d > 0 ? "+" : ""}${i.d}`).join(", ") || "none"}`);
   });
   lines.push(`\nNames the news argues against (not ranked): ${HEADWINDS.map(h => `${h.t}: ${h.text}`).join(" ")}`);
-  lines.push(`\nHistorical base rates: ${BASE_RATES.map(b => `${b.h}: ${b.big} ${b.unit}. ${b.p}`).join(" ")}`);
+  lines.push(`\nHistorical patterns: ${BASE_RATES.map(b => `${b.h}: ${b.big} ${b.unit}. ${b.p}`).join(" ")}`);
   return lines.join("\n");
 }
 
@@ -1092,11 +1354,11 @@ function renderMarkdown(md) {
 const ERR_COPY = {
   not_granted: "Claude isn't allowed on this page for you. You can change that in the page's permissions.",
   sampling_disabled: "Claude isn't available on this account.",
-  rate_limited: "Too many requests right now. Wait a minute, then ask again.",
+  rate_limited: "Too many requests right now. Wait a minute, then try again.",
   session_expired: "Your session expired. Sign in to claude.ai again, then retry.",
-  refused: "Claude declined that question. Try rephrasing it.",
+  refused: "Claude declined that request. Try rephrasing it.",
   empty_completion: "Claude returned an empty answer. Try a shorter question.",
-  invalid_json: "Claude's reply couldn't be read as headline tags. Try again, or paste fewer headlines.",
+  invalid_json: "Claude's reply couldn't be read as sentiment tags. Try again, or paste fewer headlines.",
   prompt_too_large: "That's too much text at once. Paste fewer headlines.",
 };
 const errText = e => ERR_COPY[e?.code] || "Something went wrong reaching Claude. Try again in a moment.";
@@ -1105,7 +1367,7 @@ const PERMANENT = new Set(["not_granted", "sampling_disabled", "not_declared", "
 let sample = null, askCtl = null;
 function disableClaude(msg) {
   $("#ask-btn").disabled = true; $("#score-btn").disabled = true;
-  const off = $("#ask-off"); off.textContent = msg; off.hidden = false;
+  for (const id of ["#ask-off", "#paste-off"]) { $(id).textContent = msg; $(id).hidden = false; }
 }
 
 $("#ask-btn").addEventListener("click", async () => {
@@ -1116,7 +1378,7 @@ $("#ask-btn").addEventListener("click", async () => {
   $("#ask-btn").disabled = true; $("#stop-btn").hidden = false;
   $("#ask-status").className = "status"; $("#ask-status").textContent = "Thinking…";
   $("#answer").innerHTML = "";
-  const prompt = `You are a careful equity analyst answering a question about a news-driven stock ranking. Use the data below plus well-established finance knowledge. When the data doesn't cover something, say so rather than guessing, and never present a forecast as certain. Prices are from Oct 16, 2026 and may be stale. Keep the answer under about 300 words, use short paragraphs or bullets, and refer to stocks by ticker. This is research for a self-directed investor; don't add boilerplate disclaimers.\n\n=== PAGE DATA ===\n${contextBlock()}\n=== END DATA ===\n\nQuestion: ${q}`;
+  const prompt = `You are a careful equity analyst answering a question about a news-sentiment-driven stock ranking. Use the data below plus well-established finance knowledge. When the data doesn't cover something, say so rather than guessing, and never present a forecast as certain. Prices are from Oct 16, 2026 and may be stale. Write in plain language for a non-expert, keep it under about 300 words, use short paragraphs or bullets, and refer to stocks by ticker. This is research for a self-directed investor; don't add boilerplate disclaimers.\n\n=== PAGE DATA ===\n${contextBlock()}\n=== END DATA ===\n\nQuestion: ${q}`;
   try {
     const { truncated } = await sample(prompt, { signal: askCtl.signal, onText: ({ text }) => { $("#ask-status").textContent = ""; $("#answer").innerHTML = renderMarkdown(text); } });
     $("#ask-status").textContent = truncated ? "The answer was cut short. Ask for less at a time." : "";
@@ -1132,15 +1394,14 @@ $("#ask-btn").addEventListener("click", async () => {
 });
 $("#stop-btn").addEventListener("click", () => askCtl?.abort());
 
-const TICKERS = STOCKS.map(s => s.t);
-const TARGETS = new Set([...Object.keys(SECTORS), ...TICKERS]);
+const TARGETS = new Set([...Object.keys(SECTORS), ...STOCKS.map(s => s.t)]);
 $("#score-btn").addEventListener("click", async () => {
   const lines = $("#paste").value.split("\n").map(l => l.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").trim()).filter(l => l.length > 8).slice(0, 25);
   if (!lines.length) { $("#score-status").textContent = "Paste at least one headline first."; $("#paste").focus(); return; }
   if (!sample) return;
   $("#score-btn").disabled = true;
-  $("#score-status").className = "status"; $("#score-status").textContent = `Tagging ${lines.length} headline${lines.length > 1 ? "s" : ""}…`;
-  const prompt = `You tag news headlines for a stock-ranking model. For each headline, decide which of the allowed targets it plausibly moves, and how strongly.
+  $("#score-status").className = "status"; $("#score-status").textContent = `Reading ${lines.length} headline${lines.length > 1 ? "s" : ""} for sentiment…`;
+  const prompt = `You read news headlines for sentiment and tag them for a stock-ranking model. For each headline, decide which of the allowed targets it plausibly helps or hurts, and how strongly.
 
 Allowed sector targets: ${Object.entries(SECTORS).map(([k, v]) => `${k} (${v.label})`).join(", ")}.
 Allowed ticker targets: ${STOCKS.map(s => `${s.t} (${s.name})`).join(", ")}.
@@ -1152,7 +1413,7 @@ Rules:
 - A headline with no clear market relevance gets an empty impacts list.
 - Judge from the headline text only. Do not invent facts.
 - category is one of Top, Business, Tech, Markets.
-- why is one short sentence on the market read.
+- why is one short plain-language sentence on what it means for investors.
 
 Reply with only a JSON array, one object per headline, in input order:
 [{"title":"...","category":"Business","why":"...","impacts":[{"target":"Energy","strength":2}]}]
@@ -1182,14 +1443,14 @@ ${lines.map((l, i) => `${i + 1}. ${l}`).join("\n")}`;
     store.set("h2h.pasted", state.pasted);
     $("#paste").value = "";
     const tagged = added.filter(h => h.impacts.length).length;
-    $("#score-status").textContent = `Added ${added.length} headline${added.length > 1 ? "s" : ""}; ${tagged} moved the ranking. They're in the wire under Pasted.`;
+    $("#score-status").textContent = `Added ${added.length} headline${added.length > 1 ? "s" : ""}; ${tagged} moved the ranking. They're listed below under Pasted.`;
     state.wireTab = "Pasted";
     renderWire(); renderRanking(); syncClear();
   } catch (e) {
     $("#score-status").className = "status err"; $("#score-status").textContent = errText(e);
     if (PERMANENT.has(e?.code)) disableClaude(errText(e));
   } finally {
-    if (sample && $("#ask-off").hidden) $("#score-btn").disabled = false;
+    if (sample && $("#paste-off").hidden) $("#score-btn").disabled = false;
   }
 });
 function syncClear() { $("#clear-btn").hidden = !state.pasted.length; }
@@ -1203,7 +1464,7 @@ $("#clear-btn").addEventListener("click", () => {
   try {
     sample = window.claude?.use ? await window.claude.use("sample") : null;
   } catch { sample = null; }
-  if (!sample) { disableClaude("Asking Claude works when this page is open on claude.ai. Everything else on the page works without it."); return; }
+  if (!sample) { disableClaude("Claude features work when this page is open on claude.ai. Everything else works without them."); return; }
   $("#ask-btn").disabled = false; $("#score-btn").disabled = false;
 })();
 
@@ -1223,6 +1484,8 @@ $("#tabbar").addEventListener("click", e => {
 setView(VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : store.get("h2h.view", "picks"));
 
 /* ---------- Boot ---------- */
+renderStale();
+renderHowto();
 renderTape();
 renderControls();
 renderStatic();
