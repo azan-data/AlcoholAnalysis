@@ -8,10 +8,16 @@ On screens 700px wide or narrower it switches to a phone layout: one section at 
 
 ## What's in the snapshot (Oct 18, 2026)
 
-- **News sentiment:** 42 stories from Oct 1–18, 2026, from the outlets Perplexity Discover aggregates (CNBC, Yahoo Finance, CNN, Reuters and others), with company-specific news for most of the 24 stocks. Claude read each story and tagged the sectors and tickers it helps or hurts (−3 to +3). Each story shows a tone (positive, negative, mixed or neutral), a plain-language market read and what it is good or bad for, and links to its source.
+- **News sentiment:** 41 stories from Oct 1–18, 2026, from the outlets Perplexity Discover aggregates (CNBC, Reuters, Bloomberg, CNN, Yahoo Finance and others), with company-specific news for most of the 24 stocks. 39 are confirmed by two to four independent outlets; the other 2 are shown but not counted (see Cross-checking). Claude read each story and tagged the sectors and tickers it helps or hurts (−3 to +3). Each story shows a tone (positive, negative, mixed or neutral), a plain-language market read and what it is good or bad for, and links to its source.
 - **Universe:** 24 large U.S.-listed stocks across energy, defense, semiconductors, big tech, internet, consumer, financials, healthcare, gold and power. Each has its Oct 16 close, 52-week range, latest earnings result and next catalyst, with source links.
 - **Base rates:** midterm-year Q4 seasonality, 52-week-high momentum (George & Hwang 2004), short-term reversal (Jegadeesh 1990) and post-earnings drift (Bernard & Thomas 1989).
 - **Headwinds:** names the news argues against (DAL, CRWV, EIX). These are listed but not scored.
+
+## Cross-checking
+
+No score rests on a single article. A story moves a score only when at least two independent outlets report it, and each story lists the outlets that confirm it. Syndicated copies of one article count once. Single-source stories stay on the page marked "Not counted", with a note on why. Closing prices were matched across at least two quote pages, and anything resting on one source (Conoco's close, Micron's close, Goldman's 52-week range, two earnings dates) is flagged on that stock. The rules are written down in `CLAUDE.md`, so future updates follow them.
+
+Cross-checking changed this snapshot. A report that Northrop lost an Air Force drone contest this week turned out to describe a June decision, so it no longer counts. Netflix and Vistra prices were corrected to their Oct 16 closes. Broadcom's AI revenue was updated to its latest filing. Tesla's delivery story flipped to positive once the beat was confirmed. Exxon's refining gain was weighted down after a $2.5 billion offset turned up in other coverage.
 
 ## Scoring model
 
@@ -31,10 +37,10 @@ Each stock shows its news sentiment as Bearish → Bullish with a count of good 
 
 ## Pulling in Perplexity headlines
 
-perplexity.ai has no public news-feed API, and this build environment's network policy blocked it, so the snapshot uses the original outlets. To use Perplexity Discover directly, copy headlines from perplexity.ai/discover into the **Add today's headlines from Perplexity** box on the News tab. Claude tags each one against the same sectors and tickers, and the ranking updates. Pasted headlines are saved in your browser only.
+perplexity.ai has no public news-feed API, and this build environment's network policy blocked it, so the snapshot uses the original outlets. To use Perplexity Discover directly, copy headlines from perplexity.ai/discover into the **Add today's headlines from Perplexity** box on the News tab. Claude tags each one against the same sectors and tickers. A pasted headline counts toward scores only after you confirm that at least two outlets report it (Perplexity lists its sources under each story). Pasted headlines are saved in your browser only.
 
 ## Refreshing the snapshot
 
-Prices and headlines are fixed at Oct 16–18, 2026. To refresh, update the `TAPE`, `HEADLINES` and `STOCKS` arrays in `index.html` (each entry carries its source URL), then republish. The scoring code between `/*MODEL-START*/` and `/*MODEL-END*/` doesn't need changes.
+Prices and headlines are fixed at Oct 16–18, 2026. To refresh, update the `TAPE`, `HEADLINES` and `STOCKS` arrays in `index.html`, with at least two independent sources for each story (in `also`) and each price, then republish. The scoring code between `/*MODEL-START*/` and `/*MODEL-END*/` doesn't need changes.
 
 *Research tool, not investment advice. Check live prices before trading.*
