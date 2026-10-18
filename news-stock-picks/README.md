@@ -4,6 +4,8 @@ A single-page stock screener that turns the week's top U.S. world, business and 
 
 `index.html` is the whole app: data, scoring model and UI in one file. It is published as a claude.ai Artifact. Open the file in a browser and everything works except the two "Ask Claude" panels, which need claude.ai.
 
+On screens 700px wide or narrower it switches to a phone layout: one section at a time, chosen from a bottom tab bar (Picks, News, Markets, Ask). Each tab can be linked directly with `#picks`, `#news`, `#markets` or `#ask`.
+
 ## What's in the snapshot (Oct 18, 2026)
 
 - **Wire:** 23 headlines from Oct 1–18, 2026, from the outlets Perplexity Discover aggregates (CNBC, Yahoo Finance, CNN, Axios, Business Standard and others). Each headline is tagged with the sectors and tickers it moves (−3 to +3), and every one links to its source.
