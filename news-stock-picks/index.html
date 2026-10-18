@@ -1,0 +1,1191 @@
+<title>Headlines to Holdings</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a desk morning note. Market tape on top, the ranked book on the left, the news wire on the right, the method underneath. */
+:root {
+  --bg: #eef1f4;
+  --surface: #ffffff;
+  --surface-2: #f5f7f9;
+  --ink: #142230;
+  --muted: #566473;
+  --line: #d6dde4;
+  --accent: #0e6e73;
+  --accent-soft: #dceeee;
+  --pos: #1f6fc4;
+  --neg: #d0602a;
+  --pos-soft: #e2ecf8;
+  --neg-soft: #f9e6dc;
+  --mid: #e3e7eb;
+  --up: #177a45;
+  --down: #b8332b;
+  --good: #177a45;
+  --good-soft: #dff1e6;
+  --warn: #8f5d07;
+  --warn-soft: #f6ebd5;
+  --bad: #b8332b;
+  --bad-soft: #f7e1df;
+  --hold-soft: #e8ecf0;
+  --shadow: 0 1px 2px rgba(20, 34, 48, .06), 0 4px 16px rgba(20, 34, 48, .05);
+  --font-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e141a; --surface: #151d25; --surface-2: #1a232d; --ink: #e4eaf0; --muted: #96a3b0; --line: #283440;
+    --accent: #55b9ba; --accent-soft: #15302f; --pos: #3f8ad9; --neg: #d9662f; --pos-soft: #172a3d; --neg-soft: #35221a;
+    --mid: #2a343e; --up: #4cc489; --down: #f0786c; --good: #4cc489; --good-soft: #14301f; --warn: #e0a84e; --warn-soft: #33281a;
+    --bad: #f0786c; --bad-soft: #3a1f1c; --hold-soft: #222c36; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e141a; --surface: #151d25; --surface-2: #1a232d; --ink: #e4eaf0; --muted: #96a3b0; --line: #283440;
+  --accent: #55b9ba; --accent-soft: #15302f; --pos: #3f8ad9; --neg: #d9662f; --pos-soft: #172a3d; --neg-soft: #35221a;
+  --mid: #2a343e; --up: #4cc489; --down: #f0786c; --good: #4cc489; --good-soft: #14301f; --warn: #e0a84e; --warn-soft: #33281a;
+  --bad: #f0786c; --bad-soft: #3a1f1c; --hold-soft: #222c36; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .25);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+a { color: var(--accent); text-underline-offset: 2px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+
+.wrap { max-width: 1260px; margin: 0 auto; padding-block: 28px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 28px; }
+
+/* Masthead */
+.mast { display: grid; gap: 10px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.mast h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(40px, 6vw, 64px); line-height: .95; letter-spacing: -.005em; text-transform: uppercase; }
+.mast h1 span { color: var(--accent); }
+.mast .dek { max-width: 70ch; color: var(--muted); font-size: 16px; }
+.notice { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; padding: 6px 10px; border-radius: 6px; background: var(--warn-soft); color: var(--ink); border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent); width: fit-content; max-width: 100%; }
+.notice b { color: var(--warn); }
+
+/* Tape */
+.tape { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; }
+.tick { padding: 12px 14px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); display: grid; gap: 2px; min-width: 0; }
+.tick .lbl { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 6px; }
+.tick .lbl a { text-decoration: none; color: var(--muted); font-family: var(--font-mono); }
+.tick .lbl a:hover { color: var(--accent); }
+.tick .val { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 18px; font-weight: 500; white-space: nowrap; }
+.tick .chg { font-family: var(--font-mono); font-size: 12px; white-space: nowrap; }
+.up { color: var(--up); } .down { color: var(--down); }
+
+/* The read */
+.read { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.read article { border-top: 3px solid var(--ink); padding-top: 10px; display: grid; gap: 4px; align-content: start; }
+.read h3 { font-family: var(--font-display); font-size: 21px; font-weight: 600; text-transform: uppercase; letter-spacing: .01em; line-height: 1.05; }
+.read p { font-size: 14px; color: var(--muted); }
+
+/* Main grid */
+.main { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 1040px) { .main { grid-template-columns: minmax(0, 1fr); } }
+@media (min-width: 1041px) {
+  .main > aside { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+  .wire { max-height: calc(100vh - 150px); overflow-y: auto; overscroll-behavior: contain; }
+}
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; border-bottom: 2px solid var(--ink); padding-bottom: 6px; margin-bottom: 14px; }
+.sec-h h2 { font-family: var(--font-display); font-size: 28px; font-weight: 700; text-transform: uppercase; letter-spacing: .01em; line-height: 1; }
+.sec-h .aside { font-size: 13px; color: var(--muted); }
+
+/* Controls */
+.controls { display: grid; gap: 10px; margin-bottom: 16px; }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); width: fit-content; max-width: 100%; }
+.seg button { font: 500 14px var(--font-body); color: var(--ink); background: transparent; border: 0; padding: 8px 14px; cursor: pointer; border-right: 1px solid var(--line); }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.seg button:hover:not([aria-pressed="true"]) { background: var(--surface-2); }
+details.tune { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+details.tune summary { cursor: pointer; padding: 9px 14px; font-size: 14px; font-weight: 500; list-style: none; display: flex; justify-content: space-between; gap: 8px; }
+details.tune summary::-webkit-details-marker { display: none; }
+details.tune summary::after { content: "+"; font-family: var(--font-mono); color: var(--muted); }
+details.tune[open] summary::after { content: "−"; }
+.sliders { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px 20px; padding: 4px 14px 14px; }
+.sliders label { display: grid; gap: 2px; font-size: 13px; }
+.sliders .top { display: flex; justify-content: space-between; gap: 8px; }
+.sliders .top b { font-weight: 600; }
+.sliders .hint { color: var(--muted); font-size: 12px; }
+.sliders input[type=range] { width: 100%; accent-color: var(--accent); }
+
+/* Top picks */
+.podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+@media (max-width: 720px) { .podium { grid-template-columns: minmax(0, 1fr); } }
+.pick { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; align-content: start; box-shadow: var(--shadow); cursor: pointer; text-align: left; font: inherit; color: inherit; }
+.pick:hover { border-color: var(--accent); }
+.pick .hd { display: flex; justify-content: space-between; align-items: start; gap: 8px; }
+.pick .tkr { font-family: var(--font-display); font-weight: 700; font-size: 34px; line-height: .9; }
+.pick .nm { font-size: 13px; color: var(--muted); }
+.pick .score { font-family: var(--font-mono); font-size: 26px; font-weight: 500; text-align: right; line-height: 1; }
+.pick .score small { display: block; font-size: 11px; color: var(--muted); font-family: var(--font-body); }
+.pick p { font-size: 13.5px; }
+.pick .rank { font-family: var(--font-mono); font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+
+/* Tier pills */
+.tier { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; letter-spacing: .02em; }
+.tier::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.tier.buy { background: var(--good-soft); color: var(--good); }
+.tier.acc { background: var(--accent-soft); color: var(--accent); }
+.tier.hold { background: var(--hold-soft); color: var(--muted); }
+.tier.avoid { background: var(--bad-soft); color: var(--bad); }
+
+/* Ranked book */
+.book { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+.book-head, .row { display: grid; grid-template-columns: 26px minmax(0, 1.25fr) 128px 104px minmax(0, 1.3fr) 58px 18px; grid-template-areas: "rk nm sc fx rg sw ch"; gap: 12px; align-items: center; padding: 10px 14px; }
+.book-head { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); padding-block: 8px; }
+.book-head > :nth-child(6) { text-align: right; }
+.row { border-bottom: 1px solid var(--line); cursor: pointer; width: 100%; background: transparent; border-left: 0; border-right: 0; border-top: 0; font: inherit; color: inherit; text-align: left; }
+.row:hover { background: var(--surface-2); }
+.row[aria-expanded="true"] { background: var(--surface-2); }
+.c-rk { grid-area: rk; font-family: var(--font-mono); color: var(--muted); font-size: 13px; }
+.c-nm { grid-area: nm; min-width: 0; display: grid; gap: 1px; }
+.c-nm .tkr { font-family: var(--font-display); font-weight: 700; font-size: 22px; line-height: 1; }
+.c-nm .nm { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.c-nm .ev { font-size: 11.5px; color: var(--warn); font-weight: 500; }
+.c-sc { grid-area: sc; display: grid; gap: 4px; }
+.c-sc .line { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.c-sc .v { font-family: var(--font-mono); font-size: 16px; font-weight: 500; }
+.bar { height: 6px; border-radius: 3px; background: var(--mid); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--ink); border-radius: 3px; }
+.c-fx { grid-area: fx; display: flex; gap: 5px; align-items: end; }
+.fx { display: grid; justify-items: center; gap: 2px; }
+.fx .col { width: 12px; height: 30px; background: var(--mid); border-radius: 3px; position: relative; overflow: hidden; }
+.fx .col i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
+.fx .col.na { background: transparent; border: 1px dashed var(--line); }
+.fx b { font-family: var(--font-mono); font-size: 10px; color: var(--muted); font-weight: 400; }
+.c-rg { grid-area: rg; display: grid; gap: 4px; min-width: 0; }
+.c-rg .px { display: flex; justify-content: space-between; gap: 6px; font-family: var(--font-mono); font-size: 13px; }
+.rng { position: relative; height: 6px; border-radius: 3px; background: var(--mid); }
+.rng i { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2.5px solid var(--ink); transform: translate(-50%, -50%); }
+.c-rg .ends { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.c-sw { grid-area: sw; text-align: right; font-family: var(--font-mono); font-size: 13px; }
+.c-ch { grid-area: ch; color: var(--muted); font-family: var(--font-mono); transition: transform .15s; }
+.row[aria-expanded="true"] .c-ch { transform: rotate(90deg); }
+@media (max-width: 700px) {
+  .book-head { display: none; }
+  .row { grid-template-columns: 22px minmax(0, 1fr) 112px; grid-template-areas: "rk nm sc" "rk rg rg" "rk fx sw"; row-gap: 10px; }
+  .c-ch { display: none; }
+  .c-sw { align-self: end; }
+}
+
+.detail { border-bottom: 1px solid var(--line); background: var(--surface-2); padding: 4px 14px 18px 52px; display: grid; gap: 14px; }
+@media (max-width: 700px) { .detail { padding-left: 14px; } }
+.detail .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.detail h4 { margin: 0 0 4px; font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.detail p { font-size: 14px; }
+.ftab { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ftab td { padding: 3px 0; border-bottom: 1px dotted var(--line); }
+.ftab td:not(:first-child) { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.ftab tr.tot td { border-bottom: 0; font-weight: 600; padding-top: 6px; }
+.hits { display: grid; gap: 6px; padding: 0; margin: 0; list-style: none; }
+.hits li { font-size: 13px; display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px; }
+.hits .c { font-family: var(--font-mono); text-align: right; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; }
+.facts span b { font-weight: 500; font-family: var(--font-mono); }
+.srcs { font-size: 12px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+
+/* Wire */
+.wire-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.wire-tabs button { font: 500 13px var(--font-body); padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.wire-tabs button[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.wire { display: grid; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+.story { padding: 14px 16px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
+.story:last-child { border-bottom: 0; }
+.story .meta { font-size: 11.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 10px; letter-spacing: .02em; }
+.story .cat { font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--ink); }
+.story .pasted { color: var(--accent); font-weight: 600; }
+.story h3 { font-size: 15px; font-weight: 600; line-height: 1.35; }
+.story h3 a { color: var(--ink); text-decoration: none; }
+.story h3 a:hover { text-decoration: underline; }
+.story .sum { font-size: 13.5px; }
+.story .why { font-size: 13px; color: var(--muted); }
+.story .why b { color: var(--ink); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { font-size: 11.5px; font-weight: 500; padding: 2px 7px; border-radius: 4px; font-family: var(--font-mono); white-space: nowrap; }
+.chip.p { background: var(--pos-soft); color: var(--pos); }
+.chip.n { background: var(--neg-soft); color: var(--neg); }
+.wire-empty { padding: 18px; color: var(--muted); font-size: 14px; }
+
+/* Charts */
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card h3 { font-family: var(--font-display); font-size: 22px; font-weight: 600; text-transform: uppercase; line-height: 1; }
+.card .sub { font-size: 13px; color: var(--muted); }
+.dv { display: grid; gap: 6px; }
+.dv-row { display: grid; grid-template-columns: 132px minmax(0, 1fr) 54px; gap: 10px; align-items: center; font-size: 13px; }
+.dv-row .lab { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dv-row .val { font-family: var(--font-mono); text-align: right; font-size: 12.5px; }
+.dv-track { position: relative; height: 16px; }
+.dv-track::before { content: ""; position: absolute; top: -3px; bottom: -3px; left: var(--zero, 50%); width: 1px; background: var(--muted); opacity: .6; }
+.dv-track i { position: absolute; top: 2px; height: 12px; background: var(--pos); }
+.dv-track i.neg { background: var(--neg); }
+.dv-track i.pos { border-radius: 0 4px 4px 0; }
+.dv-track i.neg { border-radius: 4px 0 0 4px; }
+.dv-track i.bench { background: var(--muted); opacity: .55; }
+.dv-row.is-bench .lab { font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+.dv-row[tabindex] { cursor: default; border-radius: 4px; }
+.dv-row:hover { background: var(--surface-2); }
+
+/* History + headwinds */
+.hist { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+.hist article { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; }
+.hist .big { font-family: var(--font-display); font-weight: 700; font-size: 38px; line-height: .95; }
+.hist .big small { font-size: 18px; font-weight: 600; color: var(--muted); }
+.hist h3 { font-size: 14px; font-weight: 600; }
+.hist p { font-size: 13.5px; color: var(--muted); }
+.hist .use { font-size: 12.5px; color: var(--ink); }
+.hist .src { font-size: 12px; }
+.heads { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+.heads article { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--bad); border-radius: 6px 10px 10px 6px; padding: 12px 14px; display: grid; gap: 4px; }
+.heads .tkr { font-family: var(--font-display); font-weight: 700; font-size: 24px; line-height: 1; }
+.heads .nm { font-size: 12.5px; color: var(--muted); }
+.heads p { font-size: 13.5px; }
+
+/* Ask Claude */
+.ask { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.ask textarea { width: 100%; min-height: 96px; resize: vertical; font: 14px/1.45 var(--font-body); color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.ask textarea:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn { font: 600 14px var(--font-body); padding: 8px 16px; border-radius: 8px; border: 1px solid var(--ink); background: var(--ink); color: var(--surface); cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.sugs { display: flex; flex-wrap: wrap; gap: 6px; }
+.sugs button { font: 13px var(--font-body); padding: 4px 10px; border-radius: 999px; border: 1px dashed var(--line); background: transparent; color: var(--ink); cursor: pointer; text-align: left; }
+.sugs button:hover { border-color: var(--accent); color: var(--accent); }
+.answer { font-size: 14.5px; line-height: 1.55; display: grid; gap: 8px; }
+.answer:empty { display: none; }
+.answer ul, .answer ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.answer h4 { margin: 4px 0 0; font-size: 14px; }
+.status { font-size: 13px; color: var(--muted); }
+.status.err { color: var(--bad); }
+.off { font-size: 13.5px; color: var(--muted); padding: 10px 12px; border: 1px dashed var(--line); border-radius: 8px; }
+
+/* Method */
+.method { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px 28px; }
+.method dl { margin: 0; display: grid; gap: 10px; }
+.method dt { font-weight: 600; font-size: 14px; }
+.method dd { margin: 0; font-size: 13.5px; color: var(--muted); }
+.method code { font-family: var(--font-mono); font-size: 12.5px; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; color: var(--ink); }
+.method p { font-size: 13.5px; color: var(--muted); }
+details.sources summary { cursor: pointer; font-weight: 500; font-size: 14px; }
+details.sources ol { font-size: 12.5px; color: var(--muted); padding-left: 22px; display: grid; gap: 3px; margin: 10px 0 0; }
+details.sources a { word-break: break-word; }
+footer { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 6px; }
+
+#tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--surface); font-size: 12.5px; line-height: 1.4; padding: 7px 9px; border-radius: 6px; max-width: 260px; box-shadow: var(--shadow); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="eyebrow"><span>Morning note · Sun Oct 18, 2026</span><span>News through Oct 18 · Prices at Fri Oct 16 close</span></div>
+    <h1>Headlines <span>to</span> Holdings</h1>
+    <p class="dek">Which U.S. stocks this week's top world, business and tech headlines favor, scored against each stock's 52-week price history, its latest earnings and long-run market base rates. Re-weight the model, read the headlines behind each score, or ask Claude about the picks.</p>
+    <p class="notice"><b>Research, not advice.</b> Scores rank ideas from public reporting. Check live prices and your own situation before you trade.</p>
+  </header>
+
+  <section class="tape" id="tape" aria-label="Market snapshot"></section>
+
+  <section aria-labelledby="read-h">
+    <div class="sec-h"><h2 id="read-h">The read</h2><span class="aside">What the week's news says about where money is moving</span></div>
+    <div class="read">
+      <article><h3>Oil shock favors producers and defense</h3><p>Brent touched $110 as Iran escalated attacks in the Strait of Hormuz. Energy leads the S&amp;P 500 this year at about +51%, and defense primes jumped about 4% on Oct 16.</p></article>
+      <article><h3>AI hardware is on sale, for a reason</h3><p>Chip stocks fell eight straight days, the longest run since 2008, on Chinese memory competition and worries about AI debt. TSMC's record quarter says demand is still there.</p></article>
+      <article><h3>Rates are the brake</h3><p>The 10-year yield sits near 5.1%, September CPI ran 3.7% and Fed minutes point to another hike. That weighs on long-duration tech, power producers and indebted borrowers.</p></article>
+      <article><h3>Earnings beats are getting paid</h3><p>Goldman and UnitedHealth beat estimates by wide margins, and money rotated into healthcare. Netflix, Tesla and Meta report next week.</p></article>
+    </div>
+  </section>
+
+  <div class="main">
+    <section aria-labelledby="book-h">
+      <div class="sec-h"><h2 id="book-h">Ranked picks</h2><span class="aside" id="book-aside">24 U.S. stocks · higher score = stronger case today</span></div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Investor profile" id="profiles"></div>
+        <details class="tune" id="tune">
+          <summary>Adjust model weights</summary>
+          <div class="sliders" id="sliders"></div>
+        </details>
+      </div>
+      <div class="podium" id="podium"></div>
+      <div class="book" id="book" role="list"></div>
+    </section>
+
+    <aside aria-labelledby="wire-h">
+      <div class="sec-h"><h2 id="wire-h">The wire</h2><span class="aside" id="wire-count"></span></div>
+      <div class="wire-tabs" id="wire-tabs" role="group" aria-label="Filter headlines"></div>
+      <div class="wire" id="wire"></div>
+    </aside>
+  </div>
+
+  <section aria-labelledby="sig-h">
+    <div class="sec-h"><h2 id="sig-h">Sector signal</h2><span class="aside">News pressure today next to how sectors have actually performed in 2026</span></div>
+    <div class="charts">
+      <div class="card">
+        <h3>News pressure by sector</h3>
+        <p class="sub">Average news score of each sector's stocks, centered on neutral (0). Recent headlines count more.</p>
+        <div class="legend"><span style="--c: var(--pos)">Headlines favor</span><span style="--c: var(--neg)">Headlines weigh on</span></div>
+        <div class="dv" id="chart-news"></div>
+      </div>
+      <div class="card">
+        <h3>2026 so far</h3>
+        <p class="sub">Year-to-date price change of S&amp;P 500 sector funds through the Oct 14 close. Sectors without a reported figure are left out. Source: <a href="https://www.openingbelldailynews.com/p/sp-500-sector-performance-2026-energy-tech-beating-index-chart" target="_blank" rel="noopener">Opening Bell Daily</a>.</p>
+        <div class="legend"><span style="--c: var(--pos)">Gain</span><span style="--c: var(--neg)">Loss</span><span style="--c: var(--muted)">S&amp;P 500 benchmark</span></div>
+        <div class="dv" id="chart-ytd"></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="hist-h">
+    <div class="sec-h"><h2 id="hist-h">What history says</h2><span class="aside">Base rates behind the model's factors</span></div>
+    <div class="hist" id="hist"></div>
+  </section>
+
+  <section aria-labelledby="head-h">
+    <div class="sec-h"><h2 id="head-h">Headwinds</h2><span class="aside">Names this week's news argues against. Not scored.</span></div>
+    <div class="heads" id="heads"></div>
+  </section>
+
+  <section aria-labelledby="ask-h">
+    <div class="sec-h"><h2 id="ask-h">Ask Claude</h2><span class="aside">Uses your Claude account; each question asks for your OK first</span></div>
+    <p class="off" id="ask-off" hidden>Asking Claude works when this page is open on claude.ai. Everything else on the page works without it.</p>
+    <div class="ask">
+      <div class="card">
+        <h3>Question the picks</h3>
+        <p class="sub">Claude sees the current ranking under your weights, the headlines and the base rates on this page.</p>
+        <div class="sugs" id="sugs"></div>
+        <label for="q" class="sub">Your question</label>
+        <textarea id="q" placeholder="e.g. Build a $10,000 balanced portfolio from the top picks and explain the sizing."></textarea>
+        <div class="btns"><button class="btn" id="ask-btn" disabled>Ask Claude</button><button class="btn ghost" id="stop-btn" hidden>Stop</button><span class="status" id="ask-status"></span></div>
+        <div class="answer" id="answer" aria-live="polite"></div>
+      </div>
+      <div class="card">
+        <h3>Add headlines from Perplexity</h3>
+        <p class="sub">Open <a href="https://www.perplexity.ai/discover" target="_blank" rel="noopener">perplexity.ai/discover</a>, copy the Top, Finance or Tech headlines you care about, and paste them here, one per line. Claude tags each with the sectors and stocks it moves, and the ranking updates.</p>
+        <label for="paste" class="sub">Headlines, one per line (up to 25)</label>
+        <textarea id="paste" placeholder="Fed's Waller says another hike is likely in December&#10;Exxon to raise buyback after record output&#10;Nvidia wins new sovereign AI order"></textarea>
+        <div class="btns"><button class="btn" id="score-btn" disabled>Score and add</button><button class="btn ghost" id="clear-btn" hidden>Remove pasted headlines</button><span class="status" id="score-status"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="method-h">
+    <div class="sec-h"><h2 id="method-h">How the score works</h2><span class="aside">Every input is shown in each stock's detail row</span></div>
+    <div class="method">
+      <dl>
+        <dt>News (0–100)</dt>
+        <dd>Each headline is tagged with the sectors and stocks it moves, from −3 to +3. A tag on the stock counts in full, a tag on its sector counts 60%. Each headline's weight halves every 7 days. The sum <code>s</code> becomes <code>50 + 50·tanh(s/3)</code>.</dd>
+        <dt>Trend (0–100)</dt>
+        <dd>Where the price sits in its 52-week range: 0 at the low, 100 at the high. Stocks near their 52-week highs have tended to keep outperforming (George &amp; Hwang, 2004).</dd>
+        <dt>Discount (0–100)</dt>
+        <dd>How far the price is below its 52-week high, with 35% or more scoring 100. This is the contrarian side, the opposite bet to Trend: recent losers tend to bounce in the short run (Jegadeesh, 1990). Profiles decide how much each style counts.</dd>
+      </dl>
+      <dl>
+        <dt>Earnings (0–100, when reported)</dt>
+        <dd>The latest quarter against analyst estimates: a big beat with raised guidance scores 100, a miss 25. Stocks that beat tend to keep drifting up for weeks (Bernard &amp; Thomas, 1989). Left blank for companies that haven't reported Q3 yet.</dd>
+        <dt>Macro fit (0–100)</dt>
+        <dd>A judgment call by Claude on how the sector fits today's backdrop: oil above $100, a 5% 10-year yield, 3.7% inflation, an active U.S.–Iran conflict and midterms on Nov 3. The reasoning appears in each stock's detail row.</dd>
+        <dt>Risk penalty</dt>
+        <dd>Volatility is estimated from the 52-week range, <code>σ ≈ ln(high/low) ÷ 1.6</code> per year, and an earnings report within 10 days adds 15 points. The penalty is <code>risk × aversion × 0.3</code>.</dd>
+      </dl>
+      <div style="display:grid; gap:12px; align-content:start">
+        <p><b style="color:var(--ink)">Score</b> = weighted average of the available factors − risk penalty. Missing factors drop out and the remaining weights are rescaled. Buy ≥ <span id="t-buy"></span>, Accumulate ≥ <span id="t-acc"></span>, Hold ≥ <span id="t-hold"></span>, Avoid below.</p>
+        <p><b style="color:var(--ink)">Typical 3-month move</b> is one standard deviation, <code>σ ÷ 2</code>, estimated from the 52-week range. About two times in three, a stock has moved less than this over three months.</p>
+        <p><b style="color:var(--ink)">Where the data came from.</b> Headlines come from the outlets Perplexity Discover draws on (CNBC, Yahoo Finance, CNN, Axios and others), collected Oct 18, 2026. Prices, ranges and earnings come from public quote pages and earnings coverage. A few figures come from one source only and are marked in their detail rows.</p>
+        <details class="sources"><summary>All sources (<span id="src-count"></span>)</summary><ol id="src-list"></ol></details>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Built Oct 18, 2026 from public reporting. Prices are Friday Oct 16 closes unless noted and will be stale by the time you read this. Nothing here is a recommendation to buy or sell a security, and past patterns don't guarantee future returns.</p>
+  </footer>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+/*MODEL-START*/
+const ASOF = "2026-10-18";
+const HALF_LIFE_DAYS = 7;
+const SECTOR_PASS = 0.6;
+const EVENT_WINDOW_DAYS = 10;
+const TIERS = { buy: 62, acc: 54, hold: 45 };
+
+const SECTORS = {
+  Energy: { label: "Energy", fit: 85, why: "Brent near $110 with Hormuz crude flows about 30% below pre-war levels; energy is the top S&P sector in 2026. Washington's Russia sanction waivers are meant to cool prices." },
+  Defense: { label: "Defense", fit: 80, why: "An active U.S.–Iran conflict, heavy use of missile defense and record contractor backlogs. A ceasefire is the main risk." },
+  Healthcare: { label: "Healthcare", fit: 70, why: "Defensive earnings that don't depend on rates or oil. Health care is the only sector still adding jobs, and money rotated in from tech this week." },
+  Gold: { label: "Gold miners", fit: 60, why: "A hedge against sticky 3.7% inflation, a softening job market and war risk. Gold is about 25% below its January record, which caps momentum." },
+  Financials: { label: "Financials", fit: 55, why: "Trading and IPO activity are booming, but loan-loss provisions are rising and the sector is flat for the year." },
+  BigTech: { label: "Big Tech", fit: 50, why: "Cash-rich and not reliant on debt, but a 5% 10-year yield pressures long-duration valuations and AI spending is under scrutiny." },
+  Internet: { label: "Internet & media", fit: 45, why: "Communication services is down about 6% this year, and investors want proof that AI capex is paying off." },
+  Semis: { label: "Semiconductors", fit: 40, why: "AI demand is intact, but an 8-day rout, Chinese memory competition, customers designing their own chips and AI-debt stress all weigh on the group." },
+  Power: { label: "Power producers", fit: 40, why: "The data-center demand story is intact, but 5% yields hurt capital-heavy utilities (down about 2% this year) and Texas power prices are low." },
+  Consumer: { label: "Consumer discretionary", fit: 30, why: "The weakest S&P sector this year. Fuel costs, 3.7% inflation and 29,000 new jobs in September squeeze shoppers." },
+};
+
+const PROFILES = {
+  conservative: { label: "Conservative", w: { news: 25, trend: 30, discount: 5, earnings: 15, macro: 25 }, aversion: 80 },
+  balanced: { label: "Balanced", w: { news: 30, trend: 20, discount: 15, earnings: 15, macro: 20 }, aversion: 40 },
+  aggressive: { label: "Aggressive", w: { news: 30, trend: 10, discount: 35, earnings: 10, macro: 15 }, aversion: 0 },
+};
+
+const FACTORS = [
+  { k: "news", label: "News", short: "N", hint: "Headline sentiment" },
+  { k: "trend", label: "Trend", short: "T", hint: "Position in 52-week range" },
+  { k: "discount", label: "Discount", short: "D", hint: "Distance below 52-week high" },
+  { k: "earnings", label: "Earnings", short: "E", hint: "Latest quarter vs. estimates" },
+  { k: "macro", label: "Macro fit", short: "M", hint: "Sector fit with today's backdrop" },
+];
+
+const clamp = (x, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, x));
+const dayMs = 864e5;
+const toDate = d => new Date(d + "T12:00:00Z");
+const ageDays = d => Math.max(0, (toDate(ASOF) - toDate(d)) / dayMs);
+const recency = d => Math.pow(0.5, ageDays(d) / HALF_LIFE_DAYS);
+
+function newsFor(stock, headlines) {
+  let raw = 0;
+  const hits = [];
+  for (const h of headlines) {
+    const w = recency(h.date);
+    let c = 0;
+    for (const im of h.impacts) {
+      if (im.t === stock.t) c += im.d * w;
+      else if (im.t === stock.sector) c += im.d * w * SECTOR_PASS;
+    }
+    if (c) { raw += c; hits.push({ h, c }); }
+  }
+  hits.sort((a, b) => Math.abs(b.c) - Math.abs(a.c));
+  return { raw, score: 50 + 50 * Math.tanh(raw / 3), hits };
+}
+
+function factorsFor(stock, headlines) {
+  const hi = Math.max(stock.hi, stock.px), lo = Math.min(stock.lo, stock.px);
+  const news = newsFor(stock, headlines);
+  const trend = (stock.px - lo) / (hi - lo) * 100;
+  const offHigh = 1 - stock.px / hi;
+  const discount = clamp(offHigh / 0.35 * 100);
+  const earnings = stock.earn ? clamp(50 + 25 * stock.earn.s) : null;
+  const macro = SECTORS[stock.sector].fit;
+  const sigma = Math.log(hi / lo) / 1.6;
+  const daysToEvent = stock.next ? (toDate(stock.next.date) - toDate(ASOF)) / dayMs : null;
+  const eventSoon = daysToEvent != null && daysToEvent >= 0 && daysToEvent <= EVENT_WINDOW_DAYS;
+  const risk = clamp(sigma / 0.8 * 100 + (eventSoon ? 15 : 0));
+  return { news: news.score, trend, discount, earnings, macro, risk, sigma, swing3m: sigma / 2, offHigh, eventSoon, daysToEvent, hits: news.hits, newsRaw: news.raw };
+}
+
+function scoreStock(f, weights, aversion) {
+  let num = 0, den = 0;
+  const parts = [];
+  for (const { k } of FACTORS) {
+    const v = f[k], w = weights[k];
+    if (v == null || !w) continue;
+    num += v * w; den += w;
+    parts.push({ k, v, w });
+  }
+  const base = den ? num / den : 50;
+  const penalty = f.risk * (aversion / 100) * 0.3;
+  for (const p of parts) p.contrib = p.v * p.w / den;
+  return { base, penalty, score: base - penalty, parts };
+}
+
+function tierOf(score) {
+  if (score >= TIERS.buy) return { k: "buy", label: "Buy" };
+  if (score >= TIERS.acc) return { k: "acc", label: "Accumulate" };
+  if (score >= TIERS.hold) return { k: "hold", label: "Hold" };
+  return { k: "avoid", label: "Avoid" };
+}
+
+function rankAll(stocks, headlines, weights, aversion) {
+  return stocks.map(s => {
+    const f = factorsFor(s, headlines);
+    const r = scoreStock(f, weights, aversion);
+    return { s, f, ...r, tier: tierOf(r.score) };
+  }).sort((a, b) => b.score - a.score);
+}
+/*MODEL-END*/
+
+/* ---------- Data (collected Oct 18, 2026) ---------- */
+const TAPE = [
+  { lbl: "S&P 500", val: "7,659.44", chg: -1.09, note: "Oct 16", url: "https://finance.yahoo.com/markets/stocks/articles/markets-news-oct-16-2026-103800633.html" },
+  { lbl: "Nasdaq", val: "26,140.03", chg: -2.14, note: "Oct 16", url: "https://finance.yahoo.com/markets/stocks/articles/markets-news-oct-16-2026-103800633.html" },
+  { lbl: "Dow", val: "52,002.41", chg: -0.34, note: "Oct 16", url: "https://finance.yahoo.com/markets/stocks/articles/markets-news-oct-16-2026-103800633.html" },
+  { lbl: "Chip index", val: "11,137.29", chg: -3.8, note: "8 down days", url: "https://finance.yahoo.com/markets/stocks/articles/chip-stocks-just-fell-8-161520543.html" },
+  { lbl: "10-yr yield", val: "5.10%", note: "Oct 15", url: "https://www.federalreserve.gov/releases/h15/" },
+  { lbl: "Brent crude", val: "$109.86", chg: 3.7, note: "Oct 16", url: "https://www.cnbc.com/2026/10/16/oil-price-today-iran-strait-hormuz-ukraine-russia.html" },
+  { lbl: "Gold", val: "$4,166", note: "Oct 16, per oz", url: "https://www.cnbc.com/select/the-price-of-gold-today-oct-16-2026/" },
+  { lbl: "CPI", val: "3.7%", note: "Sept, y/y", url: "https://www.cnbc.com/amp/2026/10/14/us-treasury-yields-cpi-inflation-report.html" },
+  { lbl: "Unemployment", val: "4.2%", note: "Sept", url: "https://www.cnbc.com/2026/10/02/jobs-report-september-2026.html" },
+];
+
+const SECTOR_YTD = [
+  { lab: "Energy (XLE)", v: 51.3 },
+  { lab: "Technology (XLK)", v: 32.3 },
+  { lab: "S&P 500", v: 12.8, bench: true },
+  { lab: "Financials", v: -0.5 },
+  { lab: "Utilities", v: -2.3 },
+  { lab: "Communication svcs", v: -5.9 },
+  { lab: "Consumer discretionary", v: -6.6 },
+];
+
+const HEADLINES = [
+  { id: "oil", cat: "Top", outlet: "CNBC", date: "2026-10-16", title: "Brent oil touches $110 as Iran escalates Hormuz attacks, Ukraine vows to hit Russian refineries", url: "https://www.cnbc.com/2026/10/16/oil-price-today-iran-strait-hormuz-ukraine-russia.html",
+    summary: "Brent hit $110 for the first time since May and settled near $109.86, up 3.7%. Crude moving through Hormuz is about 70% of pre-war levels, per Kpler. Oil is up more than 50% since the U.S.–Iran war began in late February.",
+    read: "Higher realized prices for producers and more demand for munitions; higher fuel bills for consumers and airlines.",
+    impacts: [{ t: "Energy", d: 3 }, { t: "Defense", d: 1 }, { t: "Consumer", d: -1 }] },
+  { id: "russia", cat: "Top", outlet: "CNBC", date: "2026-10-17", title: "Trump waives broad new Russia sanctions, Zelenskyy condemns it as 'wrong'", url: "https://www.cnbc.com/2026/10/17/trump-waives-russia-related-sanctions-tariffs-before-they-take-effect-.html",
+    summary: "The order waives the Graham Act's tariffs on the biggest buyers of Russian oil, days before they took effect. It follows an Oct 9 license that lets Russian diesel reach world markets. Both moves aim to bring energy prices down.",
+    read: "Washington is actively leaning against high oil, a cap on how far the energy trade can run.",
+    impacts: [{ t: "Energy", d: -1 }] },
+  { id: "fire", cat: "Top", outlet: "CNN", date: "2026-10-16", title: "New wildfire in Southern California explodes in size, burning multiple homes", url: "https://www.cnn.com/2026/10/16/weather/california-wildfires-santa-ana-winds-climate",
+    summary: "Santa Ana winds drove several fires. Malibu's Bryson Fire put more than 7,000 structures under evacuation orders or warnings before containment reached 61%, and NBC reported six homes destroyed in the Norte Fire.",
+    read: "Renews wildfire-liability risk for California utilities, already a sore spot after the state dropped a liability shield in August.",
+    impacts: [] },
+  { id: "jobs", cat: "Top", outlet: "CNBC", date: "2026-10-02", title: "Labor market faltered in September as jobs increased by just 29,000, unemployment rate rose to 4.2%", url: "https://www.cnbc.com/2026/10/02/jobs-report-september-2026.html",
+    summary: "Payrolls rose 29,000 against roughly 85,000 expected, and July and August were revised down by 60,000 combined. Wages grew 3% over the year, the slowest since May 2021. Health care added 17,000 jobs, the most of any industry.",
+    read: "A weaker consumer, with health care the one reliable source of growth.",
+    impacts: [{ t: "Consumer", d: -1 }, { t: "Healthcare", d: 0.5 }] },
+  { id: "markets", cat: "Markets", outlet: "Yahoo Finance", date: "2026-10-16", title: "Markets News, Oct. 16, 2026: Nasdaq, S&P 500 End Lower, Post Weekly Losses; AI Stocks Fall; Dow Logs Weekly Gain", url: "https://finance.yahoo.com/markets/stocks/articles/markets-news-oct-16-2026-103800633.html",
+    summary: "The S&P 500 fell 1.09% to 7,659.44 and the Nasdaq 2.14% to 26,140.03; the Nasdaq lost about 4.5% on the week, its worst since June. The Dow posted a second straight weekly gain.",
+    read: "Money is leaving AI-linked growth for the Dow's industrials, energy and value names.",
+    impacts: [{ t: "Semis", d: -1 }, { t: "BigTech", d: -0.5 }, { t: "Internet", d: -0.5 }] },
+  { id: "fed", cat: "Markets", outlet: "CNBC", date: "2026-10-07", title: "Fed officials see another hike coming, but no sign as to when, minutes show", url: "https://www.cnbc.com/2026/10/07/fed-officials-see-another-hike-coming-but-no-sign-as-to-when-minutes-show.html",
+    summary: "Minutes from the September meeting show officials expect one more rate increase before year-end, though a move at the late-October meeting looks unlikely.",
+    read: "Higher-for-longer rates hurt long-duration growth stocks, capital-heavy utilities and heavy borrowers, and help bank lending margins.",
+    impacts: [{ t: "BigTech", d: -0.5 }, { t: "Semis", d: -0.5 }, { t: "Power", d: -1 }, { t: "Consumer", d: -0.5 }, { t: "Financials", d: 0.5 }] },
+  { id: "chips", cat: "Tech", outlet: "Yahoo Finance", date: "2026-10-16", title: "Chip Stocks Just Fell 8 Days in a Row, Their Longest Losing Streak Since 2008", url: "https://finance.yahoo.com/markets/stocks/articles/chip-stocks-just-fell-8-161520543.html",
+    summary: "The Philadelphia Semiconductor Index fell 3.8% to 11,137.29, about 15.7% below its Oct 6 close, erasing roughly $2 trillion. AMD fell 5.95%, Micron 5.63% and Broadcom 4.52%; Nvidia fell less than peers.",
+    read: "Broad de-risking of the AI hardware trade; memory took the worst of it.",
+    impacts: [{ t: "Semis", d: -2 }, { t: "MU", d: -1 }] },
+  { id: "aidebt", cat: "Tech", outlet: "CNN", date: "2026-10-16", title: "Nasdaq sinks more than 2% as investors raise questions about AI debt", url: "https://www.cnn.com/2026/10/16/investing/tech-stocks-ai-coreweave",
+    summary: "CNN tied the selloff to Chinese memory maker CXMT's progress on advanced memory chips, which threatens pricing for U.S. and Korean memory makers, and to the debt behind data-center buildouts.",
+    read: "Two separate threats: cheaper Chinese memory, and AI customers that may struggle to finance more chips.",
+    impacts: [{ t: "Semis", d: -1 }, { t: "MU", d: -1 }, { t: "NVDA", d: -0.5 }] },
+  { id: "crwv", cat: "Tech", outlet: "CNBC", date: "2026-10-14", title: "CoreWeave shares tumble as bond yields near 15% on concern about AI borrowing binge", url: "https://www.cnbc.com/2026/10/14/coreweave-stock-bond-yields-ai-debt.html",
+    summary: "CoreWeave's 2032 bonds yield about 14.8%, and the stock fell about 12% on Friday and roughly 25% on the week. Nebius, Applied Digital and IREN fell 9–10%. Cantor Fitzgerald says demand is fine and financing is the problem.",
+    read: "Stress at a big GPU buyer and data-center tenant; watch for spillover to Nvidia orders and power contracts.",
+    impacts: [{ t: "NVDA", d: -0.5 }, { t: "Semis", d: -0.5 }, { t: "Power", d: -0.5 }] },
+  { id: "tsmc", cat: "Tech", outlet: "CNBC", date: "2026-10-15", title: "TSMC posts record profit for a sixth straight quarter, beating estimates on AI boom", url: "https://www.cnbc.com/2026/10/15/tsmc-third-quarter-profit-global-ai-.html",
+    summary: "Net profit rose 68.7% to about NT$763 billion, above consensus, on a 66.4% gross margin. The U.S. shares still fell, closing at $412.61 on Oct 16, on worries about capex and margins.",
+    read: "The clearest read on real AI chip demand, and it is still growing.",
+    impacts: [{ t: "TSM", d: 2 }, { t: "Semis", d: 1 }] },
+  { id: "maia", cat: "Tech", outlet: "CNBC", date: "2026-10-12", title: "Microsoft to rely more on homegrown AI chips, reducing dependence on Nvidia", url: "https://www.cnbc.com/2026/10/12/microsoft-will-mainly-use-its-maia-chips-for-ai-inference.html",
+    summary: "Microsoft unveiled its third-generation Maia 300 chip and says it beats GPU systems on tokens per megawatt. Production starts in 2027.",
+    read: "Lower AI costs for Microsoft over time; one more large customer designing around Nvidia.",
+    impacts: [{ t: "MSFT", d: 1 }, { t: "NVDA", d: -1 }] },
+  { id: "custom", cat: "Tech", outlet: "Business Standard", date: "2026-10-13", title: "Beyond Nvidia: Why tech firms are turning to custom chips for AI inference", url: "https://www.business-standard.com/amp/technology/tech-news/beyond-nvidia-why-tech-firms-are-turning-to-custom-chips-for-ai-inference-126101300896_1.html",
+    summary: "OpenAI is developing its Jalapeño inference chip with Broadcom. Google has built its own Tensor Processing Units for years.",
+    read: "Custom-silicon partners gain share of AI spending at the GPU makers' expense.",
+    impacts: [{ t: "AVGO", d: 1 }, { t: "GOOGL", d: 0.5 }, { t: "NVDA", d: -0.5 }] },
+  { id: "aapl", cat: "Tech", outlet: "MacDailyNews", date: "2026-10-16", title: "Apple shares hit new all-time closing high", url: "https://macdailynews.com/2026/10/16/apple-shares-hit-new-all-time-closing-high-35/",
+    summary: "Apple rose $1.46 to a record close of $343.46, giving it a market value of about $5.01 trillion, on a day the rest of big tech fell.",
+    read: "Investors treat Apple as a safer way to own big tech while AI spenders are under pressure.",
+    impacts: [{ t: "AAPL", d: 1.5 }] },
+  { id: "banks", cat: "Business", outlet: "CNBC", date: "2026-10-13", title: "Bank earnings takeaways: Here's how JPMorgan, Goldman, Wells Fargo and Citi performed in Q3", url: "https://www.cnbc.com/2026/10/13/bank-earnings-live-updates.html",
+    summary: "Goldman earned $17.01 a share against $13.50 expected, on equities trading and advisory. JPMorgan's adjusted $5.75 missed estimates of about $5.90, a rare miss. Citi's profit rose 40%. Banks warned that rising rates and sticky inflation will bite.",
+    read: "Wall Street trading desks are thriving; plain lending is steadier but facing rising credit costs.",
+    impacts: [{ t: "GS", d: 2 }, { t: "JPM", d: -0.5 }, { t: "Financials", d: 1 }] },
+  { id: "ms", cat: "Business", outlet: "Benzinga", date: "2026-10-15", title: "Morgan Stanley Cashes In on IPO Boom, Rakes in $232 Billion in New Assets", url: "https://www.benzinga.com/markets/earnings/26/10/62354385/morgan-stanley-cashes-in-on-ipo-boom-rakes-in-232-billion-in-new-assets",
+    summary: "Record net new assets, slightly more than half tied to IPOs. Stock-trading revenue of $5.8 billion beat the $4.9 billion analysts expected.",
+    read: "An open IPO window feeds underwriting and advisory fees across the big investment banks.",
+    impacts: [{ t: "Financials", d: 1 }, { t: "GS", d: 0.5 }] },
+  { id: "unh", cat: "Business", outlet: "CNBC", date: "2026-10-13", title: "UnitedHealth Group (UNH) earnings Q3 2026", url: "https://www.cnbc.com/2026/10/13/unitedhealth-group-unh-earnings-q3-2026.html",
+    summary: "Adjusted EPS of $4.69 against $4.14 expected, on $112.7 billion of revenue. The company raised its 2026 outlook to at least $20.50 a share.",
+    read: "A beat-and-raise from a company recovering from its worst stretch, which tends to draw follow-through buying.",
+    impacts: [{ t: "UNH", d: 2 }, { t: "Healthcare", d: 1 }] },
+  { id: "lly-rot", cat: "Business", outlet: "Quartz", date: "2026-10-15", title: "Eli Lilly stock rises as investors move from tech to healthcare", url: "https://qz.com/eli-lilly-stock-healthcare-tech-selloff-101526",
+    summary: "Lilly gained as money rotated out of the tech selloff and into healthcare.",
+    read: "Healthcare is acting as the market's shelter this week.",
+    impacts: [{ t: "LLY", d: 1 }, { t: "Healthcare", d: 1 }] },
+  { id: "lly-eu", cat: "Business", outlet: "Gotrade", date: "2026-10-16", title: "Lilly's Foundayo Pill Gets European Regulatory Backing – LLY Stock Heads For Best Week In Nearly Four Months", url: "https://www.heygotrade.com/en/us-stock/lly/",
+    summary: "European regulators backed Foundayo (orforglipron), Lilly's obesity pill already approved by the FDA. Shares closed at $1,257.03 on Oct 16.",
+    read: "Opens a second large market for the oral GLP-1.",
+    impacts: [{ t: "LLY", d: 1.5 }] },
+  { id: "delta", cat: "Business", outlet: "CNBC", date: "2026-10-09", title: "Delta Air Lines cuts 2026 forecast on fuel surge, but CEO says demand is still strong", url: "https://www.cnbc.com/2026/10/09/delta-air-lines-dal-q3-2026-earnings.html",
+    summary: "Delta cut its adjusted EPS outlook to $5.10–$5.60 from $6.50–$7.50 as its fuel bill rises about $6 billion. Q3 adjusted EPS of $1.72 missed $1.75.",
+    read: "Fuel is eating airline profits, and higher fares pass the cost on to travelers.",
+    impacts: [{ t: "Consumer", d: -0.5 }] },
+  { id: "preview", cat: "Business", outlet: "CNBC", date: "2026-10-18", title: "Meta, Tesla earnings preview: Week of Oct. 19", url: "https://www.cnbc.com/2026/10/18/meta-tesla-netflix-earnings-preview.html",
+    summary: "Netflix reports Oct 20, and Tesla and Meta on Oct 21, all after the close. Tesla's EPS is expected to fall about 14.5% from a year ago. Meta has to show its AI spending is paying off.",
+    read: "Binary events for three of the ranked names; earnings estimates have been falling for Tesla and Meta.",
+    impacts: [{ t: "TSLA", d: -1 }, { t: "META", d: -0.5 }] },
+  { id: "anthropic", cat: "Business", outlet: "tastytrade", date: "2026-10-01", title: "Anthropic IPO 2026: Date, Valuation & Timeline", url: "https://tastytrade.com/learn/markets/industry/anthropic-ipo/",
+    summary: "Anthropic filed confidentially for an IPO in June. Reports point to a listing after the Nov 3 midterms; its last private round valued it at $965 billion. No date or price has been announced.",
+    read: "Amazon and Alphabet are major Anthropic investors and cloud partners, and a listing this size would be a fee windfall for its underwriters.",
+    impacts: [{ t: "AMZN", d: 0.5 }, { t: "GOOGL", d: 0.5 }, { t: "Financials", d: 0.5 }] },
+  { id: "vst", cat: "Business", outlet: "The Motley Fool", date: "2026-10-15", title: "Vistra Stock Surged Following Its $4.2 Billion Federal Loan. With the Stock Down 23% Over the Past Year, Is It Time to Buy?", url: "https://www.fool.com/investing/2026/10/15/vistra-stock-surge-billion-federal-loan/",
+    summary: "A Department of Energy commitment of up to $4.2 billion will fund upgrades at three nuclear plants, adding about 433 MW. The stock is down 23% over the past year even as Q2 operating profit grew more than 30%.",
+    read: "Cheap federal financing for new capacity; the stock still lags its earnings growth.",
+    impacts: [{ t: "VST", d: 1 }] },
+  { id: "vst-cut", cat: "Business", outlet: "Defense World", date: "2026-10-17", title: "Vistra (NYSE:VST) Cut to \"Strong Sell\" at Zacks Research", url: "https://www.defenseworld.net/2026/10/17/vistra-nysevst-cut-to-strong-sell-at-zacks-research.html",
+    summary: "Zacks Research downgraded Vistra to Strong Sell.",
+    read: "Earnings-estimate momentum is turning against the stock.",
+    impacts: [{ t: "VST", d: -0.5 }] },
+  { id: "def", cat: "Business", outlet: "24/7 Wall St.", date: "2026-10-02", title: "The Pentagon Keeps Spending. These 4 Defense Stocks Keep Raising Their Dividends", url: "https://247wallst.com/investing/2026/10/02/the-pentagon-keeps-spending-these-4-defense-stocks-keep-raising-their-dividends/",
+    summary: "Steady government contracts and cash flow keep funding dividend increases at the big defense contractors.",
+    read: "Defense demand runs on multi-year budgets, so it doesn't depend on one headline.",
+    impacts: [{ t: "Defense", d: 1 }] },
+];
+
+const STOCKS = [
+  { t: "XOM", name: "Exxon Mobil", sector: "Energy", px: 178.98, chg: 2.5, lo: 110.39, hi: 177.43, ytd: { v: 37.8, asof: "Sep 28, total return" }, next: null,
+    thesis: "Brent near $110 and Hormuz flows about 30% below pre-war levels keep upstream cash flow high. Exxon set a 52-week high on Oct 16.",
+    risk: "Washington is trying to push oil down with Russia sanction waivers, and a ceasefire or Saudi pipeline expansion could knock crude back quickly.",
+    src: [{ l: "Price (Trading Economics)", u: "https://tradingeconomics.com/xom:us" }, { l: "52-wk range (Motley Fool)", u: "https://www.fool.com/coverage/better-buy/2026/10/14/chevron-vs-exxonmobil-which-energy-stock-is-a-better-buy-in-2026/" }, { l: "YTD (FinanceCharts)", u: "https://www.financecharts.com/compare/XOM,COP,CVX" }] },
+  { t: "CVX", name: "Chevron", sector: "Energy", px: 224.99, chg: 2.6, lo: 146.49, hi: 225.31, ytd: { v: 46.75, asof: "Oct 13" }, next: { date: "2026-10-30", label: "Earnings Oct 30" },
+    thesis: "Same oil tailwind. Chevron is up about 47% this year and closed at a 52-week high on Oct 16.",
+    risk: "Already priced near its highs, so any retreat in crude hits quickly. Reports Oct 30.",
+    src: [{ l: "Price (Yahoo Finance)", u: "https://finance.yahoo.com/quote/CVX/" }, { l: "52-wk range (CNBC)", u: "https://www.cnbc.com/quotes/CVX" }, { l: "YTD (Yahoo Finance)", u: "https://nz.finance.yahoo.com/quote/CVX/" }] },
+  { t: "COP", name: "ConocoPhillips", sector: "Energy", px: 146.51, chg: 3.37, lo: 85.57, hi: 146.59, ytd: { v: 37.6, asof: "Sep 28, total return" }, next: { date: "2026-11-05", label: "Earnings Nov 5" },
+    thesis: "A pure producer with the most leverage to the crude price of the three. Sits at its 52-week high.",
+    risk: "The biggest loser of the three if oil falls. The average analyst target, about $149, is barely above the price.",
+    src: [{ l: "Price & range (Yahoo Finance)", u: "https://finance.yahoo.com/quote/COP/" }, { l: "YTD (FinanceCharts)", u: "https://www.financecharts.com/compare/XOM,COP,CVX" }] },
+  { t: "LMT", name: "Lockheed Martin", sector: "Defense", px: 552.09, chg: 3.65, lo: 437.25, hi: 692.0, ytd: { v: 16.2, asof: "Macrotrends" }, next: { date: "2026-10-22", label: "Earnings Oct 22" },
+    thesis: "The Iran conflict and steady Pentagon budgets support demand. Shares jumped 3.65% on Oct 16 but sit about 20% below their 52-week high.",
+    risk: "Reports Oct 22. RBC recently cut its price target to $550, about where the stock trades.",
+    src: [{ l: "Price & range (Morningstar)", u: "https://www.morningstar.com/stocks/xnys/lmt/quote" }, { l: "YTD (Macrotrends)", u: "https://www.macrotrends.net/stocks/charts/LMT/lockheed-martin/stock-price-history" }, { l: "RBC target (ad-hoc-news)", u: "https://www.ad-hoc-news.de/boerse/news/corporate-news/lockheed-martin-stock-royal-bank-of-canada-cuts-target-for-lockheed-martin-stock-to-usd-550-00/70342259" }] },
+  { t: "RTX", name: "RTX", sector: "Defense", px: 193.92, chg: 3.73, lo: 156.1, hi: 226.88, next: null,
+    thesis: "Restocking Patriot missiles and radars ties RTX most directly to an air-defense war. Up 3.7% on Oct 16 and mid-range.",
+    risk: "A ceasefire would cool the trade. Its Q3 report date wasn't confirmed in the sources found.",
+    src: [{ l: "Price & range (Morningstar)", u: "https://www.morningstar.com/stocks/xnys/rtx/quote" }, { l: "Patriot exposure (Investing.com)", u: "https://www.investing.com/news/stock-market-news/best-defense-stocks-to-buy-as-usiran-conflict-enters-ninth-day-93CH-4800915" }] },
+  { t: "NOC", name: "Northrop Grumman", sector: "Defense", px: 519.86, chg: 4.05, lo: 470.06, hi: 774.0, next: null,
+    thesis: "The deepest discount in defense, 33% below its 52-week high, with a record backlog. Up 4% on Oct 16.",
+    risk: "Long-cycle strategic programs react slowly to wartime demand, and the price sits in the bottom sixth of its range.",
+    src: [{ l: "Price & range (StockAnalysis)", u: "https://stockanalysis.com/stocks/noc/" }, { l: "Backlog (MarketBeat)", u: "https://www.marketbeat.com/articles/defense-earnings-show-readiness-now-and-modernization-ahead/" }] },
+  { t: "NVDA", name: "Nvidia", sector: "Semis", px: 214.13, chg: -1.43, lo: 164.27, hi: 243.37, next: null,
+    thesis: "Fell less than peers in the chip rout, and TSMC's record quarter says AI demand is intact.",
+    risk: "Its biggest customers (Microsoft with Maia, OpenAI with Broadcom) are building their own chips, and CoreWeave's debt stress hits an important buyer.",
+    src: [{ l: "Price & range (Morningstar)", u: "https://www.morningstar.com/stocks/xnas/nvda/quote" }] },
+  { t: "TSM", name: "Taiwan Semiconductor", sector: "Semis", px: 412.61, chg: -2.28, lo: 266.82, hi: 487.47, earn: { s: 1, note: "Record Q3 profit, +68.7%, above consensus" }, next: null,
+    thesis: "A sixth straight record quarter with a 66.4% gross margin, and the shares are 15% below their high after the sector rout.",
+    risk: "The stock fell on capex and margin worries even after the beat. Taiwan geopolitics never go away.",
+    src: [{ l: "Price & range (StockAnalysis)", u: "https://stockanalysis.com/stocks/tsm/" }, { l: "Q3 results (CNBC)", u: "https://www.cnbc.com/2026/10/15/tsmc-third-quarter-profit-global-ai-.html" }] },
+  { t: "AVGO", name: "Broadcom", sector: "Semis", px: 328.75, chg: -4.52, lo: 289.96, hi: 495.0, next: null,
+    thesis: "Custom AI chips such as OpenAI's Jalapeño gain as big buyers design around GPUs. The stock is 34% below its 52-week high.",
+    risk: "Fell 4.5% on Oct 16 and sits in the bottom fifth of its range, so momentum is still negative.",
+    src: [{ l: "Price & range (StockAnalysis)", u: "https://stockanalysis.com/stocks/avgo/" }] },
+  { t: "AMD", name: "Advanced Micro Devices", sector: "Semis", px: 528.75, chg: -5.95, lo: 188.22, hi: 658.52, next: null,
+    thesis: "Still in the upper part of a huge 52-week range after a strong year. Its Helion data-center platform ships in November.",
+    risk: "Very volatile, with a $188–$659 range. It led the losers on Oct 16, down 5.95%.",
+    src: [{ l: "Price & range (Yahoo Finance)", u: "https://finance.yahoo.com/quote/AMD/" }] },
+  { t: "MU", name: "Micron Technology", sector: "Semis", px: 878.84, chg: -5.63, lo: 192.4, hi: 1255.0, ytd: { v: 263.1, asof: "Oct 8" }, next: null,
+    thesis: "One of the S&P 500's best performers this year, up about 263% as of Oct 8.",
+    risk: "Memory led the rout after China's CXMT advanced, which threatens memory pricing. The biggest swings of any stock here.",
+    src: [{ l: "Price & range (Yahoo Finance)", u: "https://finance.yahoo.com/quote/MU/" }, { l: "YTD (Chartrow)", u: "https://chartrow.com/sp500/stock-performance" }] },
+  { t: "AAPL", name: "Apple", sector: "BigTech", px: 343.46, chg: 0.43, lo: 243.42, hi: 348.15, next: null,
+    thesis: "A record close on Oct 16 while the rest of big tech fell. JPMorgan raised its target to $360 on Oct 13.",
+    risk: "Trades above the $340 consensus target, so there is little discount left.",
+    src: [{ l: "Close (StockAnalysis)", u: "https://stockanalysis.com/stocks/aapl/" }, { l: "52-wk range (Yahoo Finance)", u: "https://finance.yahoo.com/quote/AAPL/" }, { l: "Targets (MarketBeat)", u: "https://www.marketbeat.com/instant-alerts/price-apple-nasdaq-aapl-sets-new-52-week-high-after-analyst-upgrade-2026-10-13/" }] },
+  { t: "MSFT", name: "Microsoft", sector: "BigTech", px: 529.05, chg: -1.93, lo: 349.2, hi: 553.72, next: null,
+    thesis: "Near the top of its range, and the Maia 300 chip should cut its reliance on Nvidia over time.",
+    risk: "Scrutiny of AI spending and a 5% Treasury yield weigh on long-duration tech.",
+    src: [{ l: "Close (StockAnalysis)", u: "https://stockanalysis.com/stocks/msft/" }, { l: "52-wk range (Yahoo Finance)", u: "https://finance.yahoo.com/quote/MSFT/" }] },
+  { t: "GOOGL", name: "Alphabet", sector: "Internet", px: 340.59, chg: -2.47, lo: 244.15, hi: 408.61, next: null,
+    thesis: "Years ahead in custom AI chips with its TPUs, and an investor in Anthropic, which is heading toward an IPO.",
+    risk: "Fell 2.5% on Oct 16, and communication services is down about 6% this year.",
+    src: [{ l: "Close (Investing.com)", u: "https://www.investing.com/equities/google-inc-historical-data" }, { l: "52-wk range (INDmoney)", u: "https://www.indmoney.com/us-stocks/alphabet-inc-class-a-shares-share-price-googl" }] },
+  { t: "META", name: "Meta Platforms", sector: "Internet", px: 709.33, chg: -3.72, lo: 520.26, hi: 779.82, next: { date: "2026-10-21", label: "Earnings Oct 21" },
+    thesis: "Upper part of its range, and it beats estimates 88% of the time, per Bespoke.",
+    risk: "Reports Oct 21. It fell about 8% after last quarter's revenue miss, and EPS estimates were trimmed 3.4% over 30 days.",
+    src: [{ l: "Close (Finviz)", u: "https://finviz.com/stock?t=META" }, { l: "52-wk range (CNBC)", u: "https://www.cnbc.com/quotes/META" }] },
+  { t: "NFLX", name: "Netflix", sector: "Internet", px: 72.61, chg: null, pxNote: "Oct 15 close", lo: 65.08, hi: 124.86, next: { date: "2026-10-20", label: "Earnings Oct 20" },
+    thesis: "The deepest discount of any stock here, 42% below its 52-week high. Options imply about a 9% move on earnings.",
+    risk: "Reports Oct 20 after 1,000 job cuts and slowing growth. It fell 7% after its last report.",
+    src: [{ l: "Price & range (TradingKey)", u: "https://www.tradingkey.com/analysis/stocks/us-stocks/262220900-netflix-stock-forecast-layoffs-q3-earnings-75-trendline-october-16-2026-tradingkey" }] },
+  { t: "AMZN", name: "Amazon", sector: "Consumer", px: 250.0, chg: -1.87, lo: 196.0, hi: 287.2, flag: "Price is from a single Yahoo Finance listing; treat as approximate.", next: null,
+    thesis: "AWS and its Anthropic partnership give it AI exposure without chip-cycle risk.",
+    risk: "Consumer discretionary is the weakest sector this year as fuel and inflation squeeze shoppers.",
+    src: [{ l: "Price & range (Yahoo Finance)", u: "https://finance.yahoo.com/quote/AMZN/" }] },
+  { t: "TSLA", name: "Tesla", sector: "Consumer", px: 354.72, chg: -2.13, lo: 297.38, hi: 498.83, next: { date: "2026-10-21", label: "Earnings Oct 21" },
+    thesis: "29% below its 52-week high.",
+    risk: "Reports Oct 21 with EPS expected down about 14.5% from a year ago, and estimates cut about 18% over 90 days.",
+    src: [{ l: "Price & range (Yahoo Finance)", u: "https://finance.yahoo.com/quote/TSLA/" }] },
+  { t: "JPM", name: "JPMorgan Chase", sector: "Financials", px: 339.72, chg: 1.25, lo: 279.1, hi: 366.5, earn: { s: -1, note: "Adj. EPS $5.75 vs ~$5.90 expected" }, next: null,
+    thesis: "The steadiest stock here by price range, and near the top of that range.",
+    risk: "A rare Q3 miss, and management warned that rising rates and sticky inflation will bite.",
+    src: [{ l: "Price & range (CNBC)", u: "https://www.cnbc.com/quotes/JPM" }, { l: "Q3 (Fortune)", u: "https://fortune.com/2026/10/13/jpmorgan-goldman-sachs-citigroup-wells-fargo-interest-inflation/" }] },
+  { t: "GS", name: "Goldman Sachs", sector: "Financials", px: 881.26, chg: -1.12, lo: 743.11, hi: 1153.99, earn: { s: 2, note: "EPS $17.01 vs $13.50 expected" }, flag: "52-week range is from one source (Yahoo Finance).", next: null,
+    thesis: "A blowout quarter on trading and advisory, and an open IPO window feeds fees. The shares are still 24% below their high.",
+    risk: "Capital-markets revenue swings with risk appetite; a market drawdown would hit it hard.",
+    src: [{ l: "Price & range (Yahoo Finance)", u: "https://finance.yahoo.com/quote/GS/" }, { l: "Q3 (CNBC)", u: "https://www.cnbc.com/2026/10/13/bank-earnings-live-updates.html" }] },
+  { t: "LLY", name: "Eli Lilly", sector: "Healthcare", px: 1257.03, chg: 0.43, lo: 783.85, hi: 1292.65, ytd: { v: 9.1, asof: "Oct 13" }, next: { date: "2026-10-29", label: "Earnings Oct 29" },
+    thesis: "Benefiting from the rotation into healthcare plus European backing for its Foundayo obesity pill. On track for its best week in nearly four months, near its 52-week high.",
+    risk: "Reports Oct 29. The consensus target of about $1,328 is only about 6% above the price.",
+    src: [{ l: "Price, range & target (StockAnalysis)", u: "https://stockanalysis.com/stocks/lly/" }, { l: "YTD (GuruFocus)", u: "https://www.gurufocus.com/news/9122098/a-look-at-eli-lilly-and-co-lly-after-14-decline-gf-value-157510-vs-price-116651" }] },
+  { t: "UNH", name: "UnitedHealth Group", sector: "Healthcare", px: 401.43, chg: -1.29, lo: 255.97, hi: 461.62, earn: { s: 2, note: "Adj. EPS $4.69 vs $4.14; 2026 outlook raised" }, next: null,
+    thesis: "Beat and raised: adjusted EPS of $4.69 against $4.14 expected, and a 2026 outlook of at least $20.50 a share.",
+    risk: "Still 13% below its July high, and health policy is a midterm-election wildcard.",
+    src: [{ l: "Close (StockAnalysis)", u: "https://stockanalysis.com/stocks/unh/" }, { l: "52-wk range (CNBC)", u: "https://www.cnbc.com/quotes/UNH" }] },
+  { t: "NEM", name: "Newmont", sector: "Gold", px: 118.6, chg: 2.43, lo: 76.05, hi: 135.29, next: { date: "2026-10-22", label: "Earnings Oct 22" },
+    thesis: "A hedge against stagflation (3.7% inflation, 4.2% unemployment) and war risk. Up 2.4% on Oct 16.",
+    risk: "Gold is about 25% below its January record. Reports Oct 22, with weaker production and higher costs flagged.",
+    src: [{ l: "Price & range (Yahoo Finance)", u: "https://finance.yahoo.com/quote/NEM/" }, { l: "Gold record (APMEX)", u: "https://www.apmex.com/gold-price" }] },
+  { t: "VST", name: "Vistra", sector: "Power", px: 154.26, chg: null, pxNote: "Oct 15 close", lo: 132.66, hi: 217.1, next: null,
+    thesis: "A DOE loan of up to $4.2 billion for nuclear upgrades, plus data-center load growth in Texas and the mid-Atlantic.",
+    risk: "Down 23% in a year, Texas power prices are near $30/MWh, and 5% yields hurt power names. Zacks cut it to Strong Sell on Oct 17.",
+    src: [{ l: "Price & range (MarketBeat)", u: "https://www.marketbeat.com/stocks/NYSE/VST/" }] },
+];
+
+const HEADWINDS = [
+  { t: "DAL", name: "Delta Air Lines", text: "Cut its 2026 profit outlook by roughly a quarter as its fuel bill rises about $6 billion. With Brent at $110 there is no relief in sight.", u: "https://www.cnbc.com/2026/10/09/delta-air-lines-dal-q3-2026-earnings.html", l: "CNBC, Oct 9" },
+  { t: "CRWV", name: "CoreWeave", text: "Bonds yield about 14.8% and credit swaps price a better-than-60% chance of default within five years. The stock fell about 25% in one week.", u: "https://www.bloomberg.com/news/articles/2026-10-16/coreweave-stock-wipeout-exposes-divide-between-ai-fear-and-greed", l: "Bloomberg, Oct 16" },
+  { t: "EIX", name: "Edison International", text: "Fell 23% on Aug 31 after California dropped a utility liability shield. New Santa Ana fires add risk on top of 30,000+ Eaton Fire claims in litigation.", u: "https://www.bloomberg.com/news/articles/2026-08-31/pg-e-edison-international-stocks-plunge-on-california-wildfire-bill", l: "Bloomberg, Aug 31" },
+];
+
+const BASE_RATES = [
+  { big: "+6.6%", unit: "avg", h: "S&P 500 in Q4 of midterm years", p: "More than double the 2.9% average for all fourth quarters. Since 1940 the index rose in 86% of midterm Q4s. The exceptions were 1978, 2002 and 2018, when it fell more than 13%.", use: "Sets the market backdrop. Bank of America warns rate and energy shocks could outweigh it this year.", src: [{ l: "Webull / J.P. Morgan AM", u: "https://www.webull.com/news/15578174719935488" }, { l: "LPL Research", u: "https://www.lpl.com/research/blog/weak-september-seasonals-precede-strong-midterm-trends.html" }] },
+  { big: "78.9%", unit: "of Octobers", h: "October gains in midterm years", p: "October has usually been the best month for stocks in midterm years.", use: "Short-run seasonal context, not a factor in the score.", src: [{ l: "Fortune", u: "https://fortune.com/2026/09/23/in-midterm-years-october-usually-best-month-for-stocks-gains-78-9-of-the-time" }] },
+  { big: "52-wk", unit: "highs", h: "Stocks near their highs keep winning", p: "Stocks trading close to their 52-week high have tended to outperform over the following 6 to 12 months.", use: "The basis of the Trend factor.", src: [{ l: "George & Hwang, Journal of Finance (2004)", u: "https://doi.org/10.1111/j.1540-6261.2004.00695.x" }] },
+  { big: "1-mo", unit: "reversal", h: "Last month's losers tend to bounce", p: "Over horizons of about a month, the biggest losers have tended to rebound and the biggest winners to give some back.", use: "The basis of the Discount factor, weighted most in the Aggressive profile.", src: [{ l: "Jegadeesh, Journal of Finance (1990)", u: "https://doi.org/10.1111/j.1540-6261.1990.tb05110.x" }] },
+  { big: "60", unit: "days", h: "Earnings surprises drift", p: "Prices keep moving in the direction of an earnings surprise for roughly 60 trading days after the report.", use: "The basis of the Earnings factor: Goldman and UnitedHealth score highest.", src: [{ l: "Bernard & Thomas, Journal of Accounting Research (1989)", u: "https://doi.org/10.2307/2491062" }] },
+  { big: "8", unit: "days", h: "The chip losing streak", p: "The Philadelphia Semiconductor Index fell eight straight sessions through Oct 16, its longest run since 2008. A nine-session streak last ended in May 2006.", use: "Few precedents. Shows up as a high Discount score for chip stocks, offset by weak News.", src: [{ l: "24/7 Wall St.", u: "https://247wallst.com/investing/2026/10/17/oil-topped-110-as-tech-stocks-lost-1-trillion-in-a-day/" }] },
+];
+
+/* ---------- Helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = (n, d = 2) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const money = n => "$" + fmt(n, n >= 1000 ? 0 : 2);
+const signed = (n, d = 1) => (n > 0 ? "+" : n < 0 ? "−" : "") + fmt(Math.abs(n), d);
+const fmtDate = d => toDate(d).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+const store = {
+  get(k, dflt) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : dflt; } catch { return dflt; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+const TARGET_LABEL = t => SECTORS[t] ? SECTORS[t].label : t;
+
+/* ---------- State ---------- */
+const state = {
+  profile: "balanced",
+  weights: { ...PROFILES.balanced.w },
+  aversion: PROFILES.balanced.aversion,
+  open: null,
+  wireTab: "All",
+  pasted: [],
+};
+(() => {
+  const saved = store.get("h2h.prefs", null);
+  if (saved && saved.weights) {
+    state.profile = saved.profile in PROFILES || saved.profile === "custom" ? saved.profile : "balanced";
+    for (const { k } of FACTORS) if (typeof saved.weights[k] === "number") state.weights[k] = saved.weights[k];
+    if (typeof saved.aversion === "number") state.aversion = saved.aversion;
+  }
+  const p = store.get("h2h.pasted", []);
+  if (Array.isArray(p)) state.pasted = p.filter(h => h && typeof h.title === "string" && Array.isArray(h.impacts));
+})();
+const allHeadlines = () => [...state.pasted, ...HEADLINES];
+let ranked = [];
+
+/* ---------- Render: tape ---------- */
+function renderTape() {
+  $("#tape").innerHTML = TAPE.map((x, i) => `
+    <div class="tick">
+      <span class="lbl"><span>${esc(x.lbl)}</span><a href="${esc(x.url)}" target="_blank" rel="noopener" aria-label="Source for ${esc(x.lbl)}">src</a></span>
+      <span class="val">${esc(x.val)}</span>
+      <span class="chg ${x.chg == null ? "muted" : x.chg >= 0 ? "up" : "down"}">${x.chg == null ? esc(x.note) : `${x.chg >= 0 ? "▲" : "▼"} ${signed(x.chg, 2)}% <span class="muted">${esc(x.note)}</span>`}</span>
+    </div>`).join("");
+}
+
+/* ---------- Render: controls ---------- */
+function renderControls() {
+  const btns = Object.entries(PROFILES).map(([k, p]) => `<button type="button" data-profile="${k}" aria-pressed="${state.profile === k}">${p.label}</button>`);
+  btns.push(`<button type="button" data-profile="custom" aria-pressed="${state.profile === "custom"}">Custom</button>`);
+  $("#profiles").innerHTML = btns.join("");
+  $("#sliders").innerHTML = FACTORS.map(f => `
+    <label for="w-${f.k}"><span class="top"><b>${f.label}</b><span class="num" id="wv-${f.k}">${state.weights[f.k]}</span></span>
+      <input type="range" id="w-${f.k}" min="0" max="50" step="5" value="${state.weights[f.k]}" data-w="${f.k}">
+      <span class="hint">${f.hint}</span></label>`).join("") + `
+    <label for="w-aversion"><span class="top"><b>Risk aversion</b><span class="num" id="wv-aversion">${state.aversion}</span></span>
+      <input type="range" id="w-aversion" min="0" max="100" step="10" value="${state.aversion}" data-w="aversion">
+      <span class="hint">How hard to penalize volatility and earnings dates</span></label>`;
+}
+function syncControls() {
+  document.querySelectorAll("#profiles button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.profile === state.profile)));
+  for (const { k } of FACTORS) { $("#w-" + k).value = state.weights[k]; $("#wv-" + k).textContent = state.weights[k]; }
+  $("#w-aversion").value = state.aversion; $("#wv-aversion").textContent = state.aversion;
+}
+$("#profiles").addEventListener("click", e => {
+  const b = e.target.closest("button[data-profile]"); if (!b) return;
+  const k = b.dataset.profile;
+  state.profile = k;
+  if (PROFILES[k]) { state.weights = { ...PROFILES[k].w }; state.aversion = PROFILES[k].aversion; }
+  else $("#tune").open = true;
+  syncControls(); savePrefs(); renderRanking();
+});
+$("#sliders").addEventListener("input", e => {
+  const k = e.target.dataset.w; if (!k) return;
+  const v = Number(e.target.value);
+  if (k === "aversion") state.aversion = v; else state.weights[k] = v;
+  state.profile = "custom";
+  syncControls(); savePrefs(); renderRanking();
+});
+function savePrefs() { store.set("h2h.prefs", { profile: state.profile, weights: state.weights, aversion: state.aversion }); }
+
+/* ---------- Render: ranking ---------- */
+function factorCols(r) {
+  return FACTORS.map(({ k, label, short }) => {
+    const v = r.f[k], w = state.weights[k];
+    const tip = v == null ? `${label}: no data` : `${label}: ${Math.round(v)} / 100 · weight ${w}`;
+    return `<span class="fx" data-tip="${esc(tip)}"><span class="col ${v == null ? "na" : ""}">${v == null ? "" : `<i style="height:${clamp(v)}%; opacity:${w ? 1 : .3}"></i>`}</span><b>${short}</b></span>`;
+  }).join("");
+}
+function rangeCell(r) {
+  const s = r.s, hi = Math.max(s.hi, s.px), lo = Math.min(s.lo, s.px);
+  const pos = (s.px - lo) / (hi - lo) * 100;
+  const chg = s.chg == null ? `<span class="muted">${esc(s.pxNote || "")}</span>` : `<span class="${s.chg >= 0 ? "up" : "down"}">${s.chg >= 0 ? "▲" : "▼"}${fmt(Math.abs(s.chg), 2)}%</span>`;
+  return `<span class="px"><span>${money(s.px)}</span>${chg}</span>
+    <span class="rng" data-tip="${esc(`52-week range ${money(lo)} – ${money(hi)}. Price sits ${Math.round(pos)}% of the way up, ${fmt(r.f.offHigh * 100, 1)}% below the high.`)}"><i style="left:${clamp(pos)}%"></i></span>
+    <span class="ends"><span>${money(lo)}</span><span>${money(hi)}</span></span>`;
+}
+function rowHTML(r, i) {
+  const s = r.s, open = state.open === s.t;
+  return `<div role="listitem"><button type="button" class="row" data-t="${s.t}" aria-expanded="${open}"${open ? ` aria-controls="d-${s.t}"` : ""}>
+    <span class="c-rk">${i + 1}</span>
+    <span class="c-nm"><span class="tkr">${s.t}</span><span class="nm">${esc(s.name)} · ${esc(SECTORS[s.sector].label)}</span>${r.f.eventSoon ? `<span class="ev">● ${esc(s.next.label)}</span>` : ""}</span>
+    <span class="c-sc"><span class="line"><span class="tier ${r.tier.k}">${r.tier.label}</span><span class="v">${fmt(r.score, 1)}</span></span><span class="bar"><i style="width:${clamp(r.score)}%"></i></span></span>
+    <span class="c-fx">${factorCols(r)}</span>
+    <span class="c-rg">${rangeCell(r)}</span>
+    <span class="c-sw" data-tip="Typical 3-month move (one standard deviation), estimated from the 52-week range">±${Math.round(r.f.swing3m * 100)}%</span>
+    <span class="c-ch" aria-hidden="true">›</span>
+  </button>${open ? detailHTML(r) : ""}</div>`;
+}
+function detailHTML(r) {
+  const s = r.s, f = r.f;
+  const rows = r.parts.map(p => `<tr><td>${FACTORS.find(x => x.k === p.k).label}</td><td>${Math.round(p.v)}</td><td>${p.w}</td><td>${fmt(p.contrib, 1)}</td></tr>`).join("");
+  const missing = FACTORS.filter(x => f[x.k] == null).map(x => x.label);
+  const hits = f.hits.slice(0, 6).map(({ h, c }) => `<li><span class="c ${c > 0 ? "up" : "down"}">${c > 0 ? "▲" : "▼"} ${fmt(Math.abs(c), 2)}</span><span>${h.url ? `<a href="${esc(h.url)}" target="_blank" rel="noopener">${esc(h.title)}</a>` : esc(h.title)} <span class="muted">· ${esc(h.outlet)}, ${fmtDate(h.date)}</span></span></li>`).join("");
+  return `<div class="detail" id="d-${s.t}">
+    <div class="cols">
+      <div><h4>The case</h4><p>${esc(s.thesis)}</p></div>
+      <div><h4>The risk</h4><p>${esc(s.risk)}</p></div>
+    </div>
+    <div class="cols">
+      <div><h4>Why it scores ${fmt(r.score, 1)}</h4>
+        <table class="ftab"><tbody>
+          <tr><td class="muted">Factor</td><td class="muted">Value</td><td class="muted">Weight</td><td class="muted">Adds</td></tr>
+          ${rows}
+          <tr><td>Risk penalty</td><td>${Math.round(f.risk)}</td><td>${state.aversion}%</td><td>−${fmt(r.penalty, 1)}</td></tr>
+          <tr class="tot"><td>Score</td><td></td><td></td><td>${fmt(r.score, 1)}</td></tr>
+        </tbody></table>
+        ${missing.length ? `<p class="muted" style="font-size:12.5px; margin-top:6px">${esc(missing.join(", "))}: no data yet, so the other weights were rescaled.</p>` : ""}
+      </div>
+      <div><h4>Headlines moving it</h4>${hits ? `<ul class="hits">${hits}</ul>` : `<p class="muted">No headline this week touches ${s.t} or its sector.</p>`}
+        <p class="muted" style="font-size:12.5px; margin-top:6px">Net news input ${signed(f.newsRaw, 2)} → News score ${Math.round(f.news)}.</p></div>
+    </div>
+    <div class="facts">
+      <span>Close <b>${money(s.px)}</b>${s.pxNote ? ` (${esc(s.pxNote)})` : ""}</span>
+      <span>52-wk <b>${money(s.lo)}–${money(Math.max(s.hi, s.px))}</b></span>
+      ${s.ytd ? `<span>YTD <b>${signed(s.ytd.v, 1)}%</b> <span class="muted">(${esc(s.ytd.asof)})</span></span>` : ""}
+      ${s.earn ? `<span>Q3: <b>${esc(s.earn.note)}</b></span>` : ""}
+      <span>Next: <b>${s.next ? esc(s.next.label) : "no date found"}</b></span>
+      <span>Annual volatility ≈ <b>${Math.round(f.sigma * 100)}%</b></span>
+    </div>
+    <p style="font-size:13px"><b>Macro fit ${SECTORS[s.sector].fit}:</b> <span class="muted">${esc(SECTORS[s.sector].why)}</span></p>
+    ${s.flag ? `<p style="font-size:12.5px; color:var(--warn)">${esc(s.flag)}</p>` : ""}
+    <div class="srcs">Sources: ${s.src.map(x => `<a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.l)}</a>`).join("")}</div>
+  </div>`;
+}
+function renderRanking() {
+  ranked = rankAll(STOCKS, allHeadlines(), state.weights, state.aversion);
+  $("#podium").innerHTML = ranked.slice(0, 3).map((r, i) => `
+    <button type="button" class="pick" data-t="${r.s.t}">
+      <span class="rank">#${i + 1} · ${esc(SECTORS[r.s.sector].label)}</span>
+      <span class="hd"><span><span class="tkr">${r.s.t}</span><br><span class="nm">${esc(r.s.name)}</span></span><span class="score">${fmt(r.score, 1)}<small>score</small></span></span>
+      <span><span class="tier ${r.tier.k}">${r.tier.label}</span></span>
+      <p>${esc(r.s.thesis)}</p>
+    </button>`).join("");
+  $("#book").innerHTML = `<div class="book-head" aria-hidden="true"><span>#</span><span>Stock</span><span>Signal</span><span>Factors</span><span>Price · 52-wk range</span><span>3-mo</span><span></span></div>` + ranked.map(rowHTML).join("");
+  const counts = ranked.reduce((a, r) => (a[r.tier.k] = (a[r.tier.k] || 0) + 1, a), {});
+  $("#book-aside").textContent = `${ranked.length} stocks · ${counts.buy || 0} Buy · ${counts.acc || 0} Accumulate · ${counts.hold || 0} Hold · ${counts.avoid || 0} Avoid`;
+  renderNewsChart();
+}
+$("#book").addEventListener("click", e => {
+  const row = e.target.closest(".row"); if (!row || e.target.closest("a")) return;
+  state.open = state.open === row.dataset.t ? null : row.dataset.t;
+  renderRanking();
+});
+$("#podium").addEventListener("click", e => {
+  const b = e.target.closest(".pick"); if (!b) return;
+  state.open = b.dataset.t; renderRanking();
+  document.querySelector(`.row[data-t="${b.dataset.t}"]`)?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+});
+
+/* ---------- Render: wire ---------- */
+const WIRE_TABS = ["All", "Top", "Business", "Tech", "Markets", "Pasted"];
+function chipHTML(im) {
+  const n = Math.abs(im.d) >= 2.5 ? 3 : Math.abs(im.d) >= 1.5 ? 2 : 1;
+  const arrow = (im.d > 0 ? "▲" : "▼").repeat(n);
+  return `<span class="chip ${im.d > 0 ? "p" : "n"}" data-tip="${esc(`${TARGET_LABEL(im.t)}: ${im.d > 0 ? "+" : "−"}${Math.abs(im.d)} on a −3 to +3 scale`)}">${esc(TARGET_LABEL(im.t))} ${arrow}</span>`;
+}
+function renderWire() {
+  const all = allHeadlines();
+  const tabs = WIRE_TABS.filter(t => t !== "Pasted" || state.pasted.length);
+  if (!tabs.includes(state.wireTab)) state.wireTab = "All";
+  $("#wire-tabs").innerHTML = tabs.map(t => {
+    const n = t === "All" ? all.length : t === "Pasted" ? state.pasted.length : all.filter(h => h.cat === t && !h.pasted).length;
+    return `<button type="button" data-tab="${t}" aria-pressed="${state.wireTab === t}">${t} <span class="muted">${n}</span></button>`;
+  }).join("");
+  const list = all.filter(h => state.wireTab === "All" || (state.wireTab === "Pasted" ? h.pasted : h.cat === state.wireTab && !h.pasted))
+    .sort((a, b) => toDate(b.date) - toDate(a.date));
+  $("#wire-count").textContent = `${HEADLINES.length} stories, Oct 1–18${state.pasted.length ? ` · ${state.pasted.length} pasted` : ""}`;
+  $("#wire").innerHTML = list.length ? list.map(h => `
+    <article class="story">
+      <div class="meta"><span class="cat">${esc(h.cat)}</span><span>${esc(h.outlet)}</span><span>${fmtDate(h.date)}</span>${h.pasted ? `<span class="pasted">Pasted · tagged by Claude</span>` : ""}</div>
+      <h3>${h.url ? `<a href="${esc(h.url)}" target="_blank" rel="noopener">${esc(h.title)}</a>` : esc(h.title)}</h3>
+      ${h.summary ? `<p class="sum">${esc(h.summary)}</p>` : ""}
+      ${h.read ? `<p class="why"><b>Market read:</b> ${esc(h.read)}</p>` : ""}
+      ${h.impacts.length ? `<div class="chips">${h.impacts.map(chipHTML).join("")}</div>` : `<div class="chips"><span class="muted" style="font-size:12px">No direct effect on the stocks ranked here</span></div>`}
+    </article>`).join("") : `<p class="wire-empty">No headlines in this view.</p>`;
+}
+$("#wire-tabs").addEventListener("click", e => {
+  const b = e.target.closest("button[data-tab]"); if (!b) return;
+  state.wireTab = b.dataset.tab; renderWire();
+});
+
+/* ---------- Charts ---------- */
+function dvRows(items, maxAbs, fmtV) {
+  return items.map(x => {
+    const w = Math.abs(x.v) / maxAbs * 50;
+    const cls = x.bench ? "bench pos" : x.v >= 0 ? "pos" : "neg";
+    const style = x.v >= 0 ? `left:50%; width:${w}%` : `left:${50 - w}%; width:${w}%`;
+    return `<div class="dv-row ${x.bench ? "is-bench" : ""}" tabindex="0" data-tip="${esc(x.tip)}"><span class="lab">${esc(x.lab)}</span><span class="dv-track"><i class="${cls}" style="${style}"></i></span><span class="val">${fmtV(x.v)}</span></div>`;
+  }).join("");
+}
+function renderNewsChart() {
+  const by = {};
+  for (const r of ranked) (by[r.s.sector] ||= []).push(r);
+  const items = Object.entries(by).map(([k, rs]) => {
+    const v = rs.reduce((a, r) => a + r.f.news, 0) / rs.length - 50;
+    return { lab: SECTORS[k].label, v, tip: `${SECTORS[k].label}: average News score ${fmt(v + 50, 0)} across ${rs.map(r => r.s.t).join(", ")}. Macro fit ${SECTORS[k].fit}.` };
+  }).sort((a, b) => b.v - a.v);
+  $("#chart-news").innerHTML = dvRows(items, 50, v => signed(v, 0));
+}
+function renderYtdChart() {
+  const max = Math.max(...SECTOR_YTD.map(x => Math.abs(x.v)));
+  const items = SECTOR_YTD.map(x => ({ ...x, tip: `${x.lab}: ${signed(x.v, 1)}% year to date through Oct 14` }));
+  $("#chart-ytd").innerHTML = dvRows(items, max, v => signed(v, 1) + "%");
+}
+
+/* ---------- Static sections ---------- */
+function renderStatic() {
+  $("#hist").innerHTML = BASE_RATES.map(b => `
+    <article><span class="big">${esc(b.big)} <small>${esc(b.unit)}</small></span><h3>${esc(b.h)}</h3><p>${esc(b.p)}</p><p class="use">${esc(b.use)}</p>
+      <p class="src">${b.src.map(s => `<a href="${esc(s.u)}" target="_blank" rel="noopener">${esc(s.l)}</a>`).join(" · ")}</p></article>`).join("");
+  $("#heads").innerHTML = HEADWINDS.map(h => `
+    <article><span class="tkr">${h.t}</span><span class="nm">${esc(h.name)}</span><p>${esc(h.text)}</p><p class="srcs"><a href="${esc(h.u)}" target="_blank" rel="noopener">${esc(h.l)}</a></p></article>`).join("");
+  $("#t-buy").textContent = TIERS.buy; $("#t-acc").textContent = TIERS.acc; $("#t-hold").textContent = TIERS.hold;
+  const urls = new Map();
+  const add = (u, l) => { if (u && !urls.has(u)) urls.set(u, l); };
+  TAPE.forEach(x => add(x.url, x.lbl));
+  HEADLINES.forEach(h => add(h.url, `${h.outlet}: ${h.title}`));
+  STOCKS.forEach(s => s.src.forEach(x => add(x.u, `${s.t} · ${x.l}`)));
+  HEADWINDS.forEach(h => add(h.u, `${h.t} · ${h.l}`));
+  BASE_RATES.forEach(b => b.src.forEach(x => add(x.u, x.l)));
+  add("https://www.openingbelldailynews.com/p/sp-500-sector-performance-2026-energy-tech-beating-index-chart", "Sector YTD · Opening Bell Daily");
+  $("#src-count").textContent = urls.size;
+  $("#src-list").innerHTML = [...urls].map(([u, l]) => `<li>${esc(l)} — <a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\/(www\.)?/, ""))}</a></li>`).join("");
+}
+
+/* ---------- Tooltip ---------- */
+const tip = $("#tip");
+function showTip(el) {
+  const t = el.getAttribute("data-tip"); if (!t) return;
+  tip.textContent = t; tip.hidden = false;
+  const r = el.getBoundingClientRect(), tr = tip.getBoundingClientRect();
+  let x = r.left + r.width / 2 - tr.width / 2, y = r.top - tr.height - 8;
+  if (y < 8) y = r.bottom + 8;
+  x = Math.max(8, Math.min(x, innerWidth - tr.width - 8));
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+const hideTip = () => { tip.hidden = true; };
+document.addEventListener("pointerover", e => { const el = e.target.closest("[data-tip]"); if (el) showTip(el); else hideTip(); });
+document.addEventListener("focusin", e => { const el = e.target.closest("[data-tip]"); if (el) showTip(el); else hideTip(); });
+document.addEventListener("scroll", hideTip, { passive: true });
+
+/* ---------- Ask Claude ---------- */
+const SUGGESTIONS = [
+  "Build a $10,000 portfolio from the top picks for my current profile and explain the sizing.",
+  "What would have to happen for the energy and defense picks to stop working?",
+  "Is the chip selloff a buying opportunity, and which chip stock has the best risk/reward?",
+  "Which ranked stocks report earnings in the next two weeks, and how should I handle that risk?",
+];
+$("#sugs").innerHTML = SUGGESTIONS.map(s => `<button type="button">${esc(s)}</button>`).join("");
+$("#sugs").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { $("#q").value = b.textContent; $("#q").focus(); } });
+
+function contextBlock() {
+  const prof = state.profile === "custom" ? "Custom" : PROFILES[state.profile].label;
+  const lines = [];
+  lines.push(`As of ${ASOF}. Prices are Oct 16, 2026 closes unless noted.`);
+  lines.push(`Market: ${TAPE.map(x => `${x.lbl} ${x.val}${x.chg != null ? ` (${signed(x.chg, 2)}%)` : ""} [${x.note}]`).join("; ")}.`);
+  lines.push(`Sector YTD through Oct 14: ${SECTOR_YTD.map(x => `${x.lab} ${signed(x.v, 1)}%`).join("; ")}.`);
+  lines.push(`\nModel profile: ${prof}. Weights: ${FACTORS.map(f => `${f.label} ${state.weights[f.k]}`).join(", ")}; risk aversion ${state.aversion}/100. Factors are 0-100; Score = weighted mean of available factors minus risk penalty. Tiers: Buy >= ${TIERS.buy}, Accumulate >= ${TIERS.acc}, Hold >= ${TIERS.hold}.`);
+  lines.push(`\nRanking:`);
+  ranked.forEach((r, i) => {
+    const s = r.s, f = r.f;
+    lines.push(`${i + 1}. ${s.t} (${s.name}, ${SECTORS[s.sector].label}) score ${fmt(r.score, 1)} ${r.tier.label} | News ${Math.round(f.news)}, Trend ${Math.round(f.trend)}, Discount ${Math.round(f.discount)}, Earnings ${f.earnings == null ? "n/a" : Math.round(f.earnings)}, Macro ${f.macro}, Risk ${Math.round(f.risk)} | close $${s.px}${s.pxNote ? ` (${s.pxNote})` : ""}, 52-wk $${s.lo}-$${Math.max(s.hi, s.px)}, typical 3-mo move ±${Math.round(f.swing3m * 100)}% | next: ${s.next ? s.next.label : "none found"} | case: ${s.thesis} | risk: ${s.risk}`);
+  });
+  lines.push(`\nSector macro reasoning: ${Object.values(SECTORS).map(x => `${x.label} (${x.fit}): ${x.why}`).join(" ")}`);
+  lines.push(`\nHeadlines (newest first):`);
+  allHeadlines().slice().sort((a, b) => toDate(b.date) - toDate(a.date)).forEach(h => {
+    lines.push(`- [${h.date}, ${h.outlet}${h.pasted ? ", pasted by viewer" : ""}] ${h.title}${h.summary ? ` — ${h.summary}` : ""}${h.read ? ` Read: ${h.read}` : ""}`);
+  });
+  lines.push(`\nNames the news argues against (not ranked): ${HEADWINDS.map(h => `${h.t}: ${h.text}`).join(" ")}`);
+  lines.push(`\nHistorical base rates: ${BASE_RATES.map(b => `${b.h}: ${b.big} ${b.unit}. ${b.p}`).join(" ")}`);
+  return lines.join("\n");
+}
+
+function renderMarkdown(md) {
+  const out = []; let list = null;
+  const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>");
+  const close = () => { if (list) { out.push(`</${list}>`); list = null; } };
+  for (const raw of md.split("\n")) {
+    const line = raw.trimEnd();
+    let m;
+    if ((m = line.match(/^\s*[-*•]\s+(.*)/))) { if (list !== "ul") { close(); out.push("<ul>"); list = "ul"; } out.push(`<li>${inline(m[1])}</li>`); }
+    else if ((m = line.match(/^\s*\d+[.)]\s+(.*)/))) { if (list !== "ol") { close(); out.push("<ol>"); list = "ol"; } out.push(`<li>${inline(m[1])}</li>`); }
+    else if ((m = line.match(/^#{1,6}\s+(.*)/))) { close(); out.push(`<h4>${inline(m[1])}</h4>`); }
+    else if (!line.trim()) { close(); }
+    else { close(); out.push(`<p>${inline(line)}</p>`); }
+  }
+  close();
+  return out.join("");
+}
+
+const ERR_COPY = {
+  not_granted: "Claude isn't allowed on this page for you. You can change that in the page's permissions.",
+  sampling_disabled: "Claude isn't available on this account.",
+  rate_limited: "Too many requests right now. Wait a minute, then ask again.",
+  session_expired: "Your session expired. Sign in to claude.ai again, then retry.",
+  refused: "Claude declined that question. Try rephrasing it.",
+  empty_completion: "Claude returned an empty answer. Try a shorter question.",
+  invalid_json: "Claude's reply couldn't be read as headline tags. Try again, or paste fewer headlines.",
+  prompt_too_large: "That's too much text at once. Paste fewer headlines.",
+};
+const errText = e => ERR_COPY[e?.code] || "Something went wrong reaching Claude. Try again in a moment.";
+const PERMANENT = new Set(["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"]);
+
+let sample = null, askCtl = null;
+function disableClaude(msg) {
+  $("#ask-btn").disabled = true; $("#score-btn").disabled = true;
+  const off = $("#ask-off"); off.textContent = msg; off.hidden = false;
+}
+
+$("#ask-btn").addEventListener("click", async () => {
+  const q = $("#q").value.trim();
+  if (!q) { $("#ask-status").textContent = "Type a question first."; $("#q").focus(); return; }
+  if (!sample) return;
+  askCtl = new AbortController();
+  $("#ask-btn").disabled = true; $("#stop-btn").hidden = false;
+  $("#ask-status").className = "status"; $("#ask-status").textContent = "Thinking…";
+  $("#answer").innerHTML = "";
+  const prompt = `You are a careful equity analyst answering a question about a news-driven stock ranking. Use the data below plus well-established finance knowledge. When the data doesn't cover something, say so rather than guessing, and never present a forecast as certain. Prices are from Oct 16, 2026 and may be stale. Keep the answer under about 300 words, use short paragraphs or bullets, and refer to stocks by ticker. This is research for a self-directed investor; don't add boilerplate disclaimers.\n\n=== PAGE DATA ===\n${contextBlock()}\n=== END DATA ===\n\nQuestion: ${q}`;
+  try {
+    const { truncated } = await sample(prompt, { signal: askCtl.signal, onText: ({ text }) => { $("#ask-status").textContent = ""; $("#answer").innerHTML = renderMarkdown(text); } });
+    $("#ask-status").textContent = truncated ? "The answer was cut short. Ask for less at a time." : "";
+  } catch (e) {
+    if (e?.text) $("#answer").innerHTML = renderMarkdown(e.text); else if (e?.code === "refused") $("#answer").innerHTML = "";
+    if (e?.code !== "cancelled") { $("#ask-status").className = "status err"; $("#ask-status").textContent = errText(e); }
+    else $("#ask-status").textContent = "Stopped.";
+    if (PERMANENT.has(e?.code)) disableClaude(errText(e));
+  } finally {
+    $("#stop-btn").hidden = true;
+    if (sample && $("#ask-off").hidden) $("#ask-btn").disabled = false;
+  }
+});
+$("#stop-btn").addEventListener("click", () => askCtl?.abort());
+
+const TICKERS = STOCKS.map(s => s.t);
+const TARGETS = new Set([...Object.keys(SECTORS), ...TICKERS]);
+$("#score-btn").addEventListener("click", async () => {
+  const lines = $("#paste").value.split("\n").map(l => l.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").trim()).filter(l => l.length > 8).slice(0, 25);
+  if (!lines.length) { $("#score-status").textContent = "Paste at least one headline first."; $("#paste").focus(); return; }
+  if (!sample) return;
+  $("#score-btn").disabled = true;
+  $("#score-status").className = "status"; $("#score-status").textContent = `Tagging ${lines.length} headline${lines.length > 1 ? "s" : ""}…`;
+  const prompt = `You tag news headlines for a stock-ranking model. For each headline, decide which of the allowed targets it plausibly moves, and how strongly.
+
+Allowed sector targets: ${Object.entries(SECTORS).map(([k, v]) => `${k} (${v.label})`).join(", ")}.
+Allowed ticker targets: ${STOCKS.map(s => `${s.t} (${s.name})`).join(", ")}.
+
+Rules:
+- Use only the allowed targets, spelled exactly as listed.
+- strength is a number from -3 (strongly negative) to 3 (strongly positive); never 0.
+- 0 to 4 impacts per headline. Tag a ticker only when the headline is about that company; otherwise tag sectors. Skip anything you are unsure about.
+- A headline with no clear market relevance gets an empty impacts list.
+- Judge from the headline text only. Do not invent facts.
+- category is one of Top, Business, Tech, Markets.
+- why is one short sentence on the market read.
+
+Reply with only a JSON array, one object per headline, in input order:
+[{"title":"...","category":"Business","why":"...","impacts":[{"target":"Energy","strength":2}]}]
+
+Headlines:
+${lines.map((l, i) => `${i + 1}. ${l}`).join("\n")}`;
+  try {
+    const res = await sample.json(prompt, { modelTier: "quick" });
+    if (!Array.isArray(res)) throw { code: "invalid_json" };
+    const stamp = Date.now();
+    const today = new Date().toISOString().slice(0, 10);
+    const added = res.slice(0, lines.length).map((x, i) => ({
+      id: `p-${stamp}-${i}`,
+      cat: ["Top", "Business", "Tech", "Markets"].includes(x?.category) ? x.category : "Top",
+      outlet: "Perplexity (pasted)",
+      date: today < ASOF ? ASOF : today,
+      title: lines[i],
+      url: null,
+      summary: "",
+      read: typeof x?.why === "string" ? x.why.slice(0, 300) : "",
+      impacts: (Array.isArray(x?.impacts) ? x.impacts : [])
+        .map(im => ({ t: String(im?.target ?? ""), d: Math.max(-3, Math.min(3, Number(im?.strength))) }))
+        .filter(im => TARGETS.has(im.t) && Number.isFinite(im.d) && im.d !== 0).slice(0, 4),
+      pasted: true,
+    }));
+    state.pasted = [...added, ...state.pasted].slice(0, 60);
+    store.set("h2h.pasted", state.pasted);
+    $("#paste").value = "";
+    const tagged = added.filter(h => h.impacts.length).length;
+    $("#score-status").textContent = `Added ${added.length} headline${added.length > 1 ? "s" : ""}; ${tagged} moved the ranking.`;
+    state.wireTab = "Pasted";
+    renderWire(); renderRanking(); syncClear();
+  } catch (e) {
+    $("#score-status").className = "status err"; $("#score-status").textContent = errText(e);
+    if (PERMANENT.has(e?.code)) disableClaude(errText(e));
+  } finally {
+    if (sample && $("#ask-off").hidden) $("#score-btn").disabled = false;
+  }
+});
+function syncClear() { $("#clear-btn").hidden = !state.pasted.length; }
+$("#clear-btn").addEventListener("click", () => {
+  state.pasted = []; store.set("h2h.pasted", []);
+  $("#score-status").className = "status"; $("#score-status").textContent = "Removed pasted headlines.";
+  renderWire(); renderRanking(); syncClear();
+});
+
+(async () => {
+  try {
+    sample = window.claude?.use ? await window.claude.use("sample") : null;
+  } catch { sample = null; }
+  if (!sample) { disableClaude("Asking Claude works when this page is open on claude.ai. Everything else on the page works without it."); return; }
+  $("#ask-btn").disabled = false; $("#score-btn").disabled = false;
+})();
+
+/* ---------- Boot ---------- */
+renderTape();
+renderControls();
+renderStatic();
+renderYtdChart();
+renderWire();
+renderRanking();
+syncClear();
+</script>
