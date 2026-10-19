@@ -11,3 +11,9 @@ Never base a score, a pick or a statement on a single news article.
 - Prefer the most recent confirmed figures. A commentary piece can quote stale numbers, so check the latest filing.
 - Closing prices must match across at least two quote pages. Anything resting on one source (a 52-week range, an earnings date, a price) gets a `flag` on the stock.
 - Pasted Perplexity headlines start unconfirmed and count only after the viewer marks them confirmed.
+- On a refresh, use the newest close that two sources confirm for each stock and label its date (`pxNote`); keep the older verified close otherwise.
+
+## Be honest about predictability
+
+- The page must not present scores as forecasts. Keep the Trust tab's research summary (`EVIDENCE_WORKS`, `EVIDENCE_FAILS`, `APP_EVIDENCE`) current, with two sources per finding.
+- New factors should have research behind them (momentum, quality, value, low volatility, insider buying, short interest, estimate revisions) and an evidence grade in `APP_EVIDENCE`.
